@@ -81,10 +81,19 @@ public class Compiler {
 		if ( lexer.token != Symbol.LEFTCURBRACKET )
 			error.show("{ expected", true);
 		lexer.nextToken();
-
-		while (lexer.token == Symbol.PRIVATE || lexer.token == Symbol.PUBLIC) {
-
+		
+		while (lexer.token == Symbol.PRIVATE || lexer.token == Symbol.PUBLIC  || lexer.token == Symbol.STATIC) {
+			
 			Symbol qualifier;
+			//adicionando flag para verificar se houve declaracao disso como static
+			boolean staticFlag = false;
+			//se o token for static, vai pro proximo, e defina flag como true, senao volta pra falso
+			if(lexer.token == Symbol.STATIC){
+				lexer.nextToken();
+				staticFlag = true;
+			}else{
+				staticFlag = false;
+			}
 			switch (lexer.token) {
 			case PRIVATE:
 				lexer.nextToken();
@@ -104,11 +113,16 @@ public class Compiler {
 			String name = lexer.getStringValue();
 			lexer.nextToken();
 			if ( lexer.token == Symbol.LEFTPAR )
+				//passando staticFlag para fazer verificacoes na semantica do metodo
 				methodDec(t, name, qualifier);
 			else if ( qualifier != Symbol.PRIVATE )
 				error.show("Attempt to declare a public instance variable");
-			else
-				instanceVarDec(t, name);
+			else{
+				//Adicionando verificacao para se instanceVarDec for static e public, mostrar erro como operacao ilegal
+				if(staticFlag && qualifier == Symbol.PUBLIC)
+					error.show("Attempt to create a static public variable, illegal operation");
+				instanceVarDec(t, name, className, staticFlag);
+			}
 		}
 		if ( lexer.token != Symbol.RIGHTCURBRACKET )
 			error.show("public/private or \"}\" expected");
@@ -116,19 +130,47 @@ public class Compiler {
 
 	}
 
-	private void instanceVarDec(Type type, String name) {
+	//Modifiquei instanceVarDec para aceitar o nome da classe e a flag dizendo se eh static ou nao
+	private InstanceVariableList instanceVarDec(Type type, String name, String className, boolean staticFlag) {
 		// InstVarDec ::= [ "static" ] "private" Type IdList ";"
-
+		//cria nova lista de instancias
+		InstanceVariableList varList = new InstanceVariableList();
+		//retorna o objeto da classe em que as instancias se encontrarao
+		KraClass classObj = symbolTable.getInGlobal(className);
+		//se a classe nao for encontrada, mostrar erro
+		if(classObj == null)
+			error.show("Could not find reference to class "+className);
+		//Procura instancia sendo ela static ou nao dentro da lista de instancias da classe, se nao achar entao adicione
+		// a instancia a lista
+		if((classObj.searchInstance(name, staticFlag)) == null)
+			varList.addElement(new InstanceVariable(name, type));
+		else{
+			//senao mostre erro apropriado se ja existe
+			if(staticFlag)
+				error.show("Duplicate declaration for static instance "+name);
+			else
+				error.show("Duplicate declaration for instance "+name);
+		}
 		while (lexer.token == Symbol.COMMA) {
 			lexer.nextToken();
 			if ( lexer.token != Symbol.IDENT )
 				error.show("Identifier expected");
 			String variableName = lexer.getStringValue();
+			//Procura as seguintes declaracoes nas listas correspondentes novamente e adiciona, assim como antes
+			if((classObj.searchInstance(variableName, staticFlag)) == null)
+				varList.addElement(new InstanceVariable(variableName, type));
+			else{
+				if(staticFlag)
+					error.show("Duplicate declaration for static instance "+name);
+				else
+					error.show("Duplicate declaration for instance "+name);
+			}
 			lexer.nextToken();
 		}
 		if ( lexer.token != Symbol.SEMICOLON )
 			error.show(CompilerError.semicolon_expected);
 		lexer.nextToken();
+		return varList;
 	}
 
 	private void methodDec(Type type, String name, Symbol qualifier) {
@@ -147,43 +189,79 @@ public class Compiler {
 		lexer.nextToken();
 		statementList();
 		if ( lexer.token != Symbol.RIGHTCURBRACKET ) error.show("} expected");
-
+		//ao fim da analise de metodo, pra nao me esquecer, limpe a localTable
+		symbolTable.removeLocalIdent();
 		lexer.nextToken();
 
 	}
 
-	private void localDec() {
+	//Adicionando retorno de LocalVarList
+	private LocalVarList localDec() {
 		// LocalDec ::= Type IdList ";"
-
+		//Crio uma localDecList
+		LocalVarList localDecList = new LocalVarList();
 		Type type = type();
 		if ( lexer.token != Symbol.IDENT ) error.show("Identifier expected");
 		Variable v = new Variable(lexer.getStringValue(), type);
+		//Vou adicionando os elementos na lista 
+		localDecList.addElement(v);
 		lexer.nextToken();
 		while (lexer.token == Symbol.COMMA) {
 			lexer.nextToken();
 			if ( lexer.token != Symbol.IDENT )
 				error.show("Identifier expected");
+			//Conforme o loop vai rodando tambem vou adicionando 
 			v = new Variable(lexer.getStringValue(), type);
+			localDecList.addElement(v);
 			lexer.nextToken();
 		}
+		return localDecList;
 	}
 
-	private void formalParamDec() {
+	private ParamList formalParamDec() {
 		// FormalParamDec ::= ParamDec { "," ParamDec }
-
-		paramDec();
+		//Cria uma parameter list
+		ParamList paramList; 
+		//Inicializo
+		paramList = new ParamList();
+		//Adiciono o parametro que recebo de paramDec na lista
+		paramList.addElement(paramDec());
+		//E continuo adicionando enquanto houverem mais
 		while (lexer.token == Symbol.COMMA) {
 			lexer.nextToken();
-			paramDec();
+			paramList.addElement(paramDec());
 		}
+		//Apago a tabela local, ja que ja verifiquei se existiam parametros repetidos
+		symbolTable.removeLocalIdent();
+		return paramList;
 	}
 
-	private void paramDec() {
+	//Retorna Parameter
+	private Parameter paramDec() {
 		// ParamDec ::= Type Id
-
-		type();
+		Type t;
+		String name;
+		Variable p; 
+		Parameter newP = null;
+		
+		
+		t = type();
+		
+		
 		if ( lexer.token != Symbol.IDENT ) error.show("Identifier expected");
+		
+		name = lexer.getStringValue();
+		//verifico se ja nao existe parametro com mesmo nome na lista de parametros atraves da localTable
+		if((p = symbolTable.getInLocal(lexer.getStringValue())) == null){
+			//Crio um novo Parameter object
+			newP = new Parameter(name, t);
+			symbolTable.putInLocal(lexer.getStringValue(), newP);
+		}else{
+			error.show("Duplicate parameters for method");
+		}
+		
 		lexer.nextToken();
+		return newP;
 	}
 
 	private Type type() {
@@ -206,7 +284,10 @@ public class Compiler {
 		case IDENT:
 			// # corrija: faça uma busca na TS para buscar a classe
 			// IDENT deve ser uma classe.
-			result = null;
+			
+			//uso o metodo getInGlobal para procurar a definicao da classe na tabela global 
+			result = symbolTable.getInGlobal(lexer.getStringValue());
+			if(result == null) error.show(lexer.getStringValue()+" is not a class");
 			break;
 		default:
 			error.show("Type expected");

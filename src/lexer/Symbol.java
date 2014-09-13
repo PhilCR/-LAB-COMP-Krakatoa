@@ -43,6 +43,7 @@ public enum Symbol {
     RIGHTCURBRACKET("}"),
     RIGHTPAR(")"),
     SEMICOLON(";"),
+    STATIC("static"),
     STRING("String"),
     SUPER("super"),
     THIS("this"),
