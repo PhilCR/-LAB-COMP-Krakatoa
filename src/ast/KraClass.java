@@ -9,6 +9,10 @@ public class KraClass extends Type {
 	
    public KraClass( String name ) {
       super(name);
+      //Adicionando inicializacao para null, eh util na hora de inicializar as listas dentro da classe
+      // ja que se o valor nao for null entao a lista ja foi inicializada 
+      instanceVariableList = null;
+      staticInstanceList = null;
    }
    
    public String getCname() {
@@ -42,6 +46,48 @@ public class KraClass extends Type {
 	   }
 	   //se nao achar nenhuma, entao retorna null
 	   return null;
+   }
+   
+   //Inicializa lista de instancias se ela nao tiver sido inicializada
+   public void initInstanceList(){
+	   if(instanceVariableList == null){
+		   instanceVariableList = new InstanceVariableList();
+	   }
+   }
+   
+   //Inicializa a lista de instancias estaticas da mesma forma que a anterior eh inicializada
+   public void initStaticInstanceList(){
+	   if(staticInstanceList == null){
+		   staticInstanceList = new InstanceVariableList();
+	   }
+   }
+   
+   //Eh chamada do codigo da analise sintatica, recebe uma lista de instancias e se elas sao estaticas ou nao
+   public void addElements(InstanceVariableList v, boolean staticFlag){
+	   //cria iterador para os elementos que serao inseridos
+	   Iterator<InstanceVariable> i;
+	   i = v.elements();
+	   //insere os elementos na lista correspondente que eles devem ser inseridos
+	   if(staticFlag){
+		   while(i.hasNext()){
+			   instanceVariableList.addElement(i.next());
+		   }
+	   }else{
+		   while(i.hasNext()){
+			   staticInstanceList.addElement(i.next());
+		   }
+	   }
+		   
+   }
+   
+   //retorna super classe
+   public KraClass getSuperClass(){
+	   return superclass;
+   }
+   
+   //seta super classe
+   public void setSuperClass(KraClass superclass){
+	   this.superclass = superclass;
    }
    
    private String name;

@@ -69,13 +69,21 @@ public class Compiler {
 			error.show(CompilerError.ident_expected);
 		String className = lexer.getStringValue();
 		symbolTable.putInGlobal(className, new KraClass(className));
+		// Pegando referencia de classe do hashmap pra poder modificar como necessario
+		KraClass ref = symbolTable.getInGlobal(className);
 		lexer.nextToken();
 		if ( lexer.token == Symbol.EXTENDS ) {
 			lexer.nextToken();
 			if ( lexer.token != Symbol.IDENT )
 				error.show(CompilerError.ident_expected);
 			String superclassName = lexer.getStringValue();
-
+			//procurando a super classe caso a mesma exista 
+			KraClass superclass = symbolTable.getInGlobal(superclassName);
+			//se a classe nao eh encontrada na symbol table entao sinalizar erro
+			if(superclass == null)
+				error.show("Cannot extend from Super class "+superclassName+", the class doesn't exist");
+			//se tudo der certo, entao setar superclasse da KraClass =)
+			ref.setSuperClass(superclass);
 			lexer.nextToken();
 		}
 		if ( lexer.token != Symbol.LEFTCURBRACKET )
@@ -118,10 +126,10 @@ public class Compiler {
 			else if ( qualifier != Symbol.PRIVATE )
 				error.show("Attempt to declare a public instance variable");
 			else{
-				//Adicionando verificacao para se instanceVarDec for static e public, mostrar erro como operacao ilegal
-				if(staticFlag && qualifier == Symbol.PUBLIC)
-					error.show("Attempt to create a static public variable, illegal operation");
-				instanceVarDec(t, name, className, staticFlag);
+				//Adicionando criacao de instanceVarDec como objeto e adicionando a classe em questao
+				InstanceVariableList vList = instanceVarDec(t, name, className, staticFlag);
+				//Manda static flag pra ver se entra na lista de static ou nao
+				ref.addElements(vList, staticFlag);
 			}
 		}
 		if ( lexer.token != Symbol.RIGHTCURBRACKET )
