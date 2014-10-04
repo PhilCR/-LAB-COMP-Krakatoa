@@ -1,0 +1,21 @@
+/*
+  @filename   er-sin48.kra
+
+  @comment    metodo final privado
+
+*/
+
+class A {
+
+   final private void m() {  //#
+   }
+
+}
+
+
+class Program {
+  
+    public void run() {
+    }
+
+}

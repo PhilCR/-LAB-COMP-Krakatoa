@@ -1,0 +1,17 @@
+/*
+  @filename   er-sem83.kra
+
+  @comment    classe final sendo herdada
+
+*/
+
+final class Terra {
+}
+
+// uma sub-terra? Isto não deve ser possível
+class Program extends Terra {  //#
+    
+    public void run() {  
+    }
+
+}

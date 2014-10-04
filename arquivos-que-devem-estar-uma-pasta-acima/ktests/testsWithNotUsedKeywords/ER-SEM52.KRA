@@ -1,0 +1,15 @@
+/*
+  @filename   er-sem52.kra
+      
+  @comment    classe Program abstrata
+  */
+
+
+abstract class Program {  //#
+   
+   public void run() {
+   }   
+
+}
+
+

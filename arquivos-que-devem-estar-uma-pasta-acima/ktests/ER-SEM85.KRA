@@ -1,0 +1,17 @@
+/*
+  @filename   er-sem84.kra
+
+  @comment    Método final em classe final
+
+*/
+final class SuperProgram {
+    final public void eusoufinal() { }  //#
+
+}
+
+class Program {
+    
+    public void run() {  
+    }
+
+}

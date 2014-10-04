@@ -21,7 +21,15 @@ public class ExprList {
                 pw.print(", ");
         }
     }
-
+    
+    public Iterator<Expr> elements(){
+		return exprList.iterator();
+    }
+    
+    public int getSize(){
+    	return exprList.size();
+    }
+    
     private ArrayList<Expr> exprList;
 
 }

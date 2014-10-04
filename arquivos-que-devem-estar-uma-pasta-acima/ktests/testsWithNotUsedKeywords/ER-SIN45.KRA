@@ -1,0 +1,17 @@
+/*
+  @filename   er-sin45.kra
+
+  @comment    uso incorreto do simbolo abstract
+
+*/
+
+class abstract A {  //#
+}
+
+
+class Program {
+  
+    public void run() {
+    }
+
+}

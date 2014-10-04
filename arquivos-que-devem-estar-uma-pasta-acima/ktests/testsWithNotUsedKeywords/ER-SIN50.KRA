@@ -1,0 +1,21 @@
+/*
+  @filename   er-sin50.kra
+
+  @comment    erro sintaxe na declaracao de metodo final
+
+*/
+
+
+class Program {
+    
+    final void m() {  //#
+    }
+  
+    public void run() {
+       A a;
+
+       a = new A();
+       a.m();
+    }
+
+}

@@ -1,0 +1,13 @@
+/*
+  @filename   er-sem79.kra
+
+  @comment    método run com parâmetros
+
+*/
+
+class Program {
+    
+    public void run(int n) {  //#
+    }
+
+}

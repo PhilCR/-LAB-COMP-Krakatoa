@@ -1,0 +1,25 @@
+/*
+  @filename   er-sin49.kra
+
+  @comment    erro sintaxe na declaracao de metodo abstract
+
+*/
+
+abstract class A {
+
+   abstract void m() {  //#
+   }
+
+}
+
+
+class Program {
+  
+    public void run() {
+       A a;
+
+       a = new A();
+       a.m();
+    }
+
+}

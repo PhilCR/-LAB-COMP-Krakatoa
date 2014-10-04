@@ -1,0 +1,80 @@
+/*
+  @filename   ok-sem16.kra
+  
+  @comment    Exemplo de classes abstratas
+*/
+
+class E {
+}
+
+abstract class A  extends E {
+    
+    abstract public void m();
+    
+    private int zero() {
+       return 0;
+    }
+    
+    private int n;
+    
+    final public int get() {
+       return this.n + this.zero();
+    }
+    
+    public void set( int n ) {
+       this.n = n;
+    }
+}
+   
+   
+abstract class B extends A {
+   abstract public void p();
+}
+
+class C extends A {
+   public void m() {
+       write("C::m");
+   }
+}
+
+class D extends B {
+    
+   public void m() {
+       write("D::m");
+   }
+   
+   final public void p() {
+       write("D::p");
+   }
+   
+}
+
+class Program {
+   
+   public void run() {
+    
+      A a;
+      B b;
+      C c;
+      D d;
+      
+      d = new D();
+      d.set(2);
+      c = new C();
+      c.set(1);
+      b = d;
+      a = c;
+      a.m();
+      write( a.get(), b.get(), c.get(), d.get() );
+      b.m();
+      b.p();
+      
+      c.m();
+      
+      d.m();
+      d.p();
+       
+   }
+   
+}
+   

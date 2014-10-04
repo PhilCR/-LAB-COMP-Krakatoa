@@ -20,6 +20,10 @@ public class ParamList {
         return paramList.size();
     }
 
+    public boolean isEmpty(){
+    	return paramList.isEmpty();
+    }
+    
     private ArrayList<Variable> paramList;
 
 }

@@ -1,0 +1,21 @@
+/*
+  @filename   er-sem54.kra
+      
+  @comment    tentativa de criar objeto de classe abstrata
+  */
+
+abstract class A {
+}
+
+
+class Program {
+   
+   public void run() {
+      A a;
+      
+      a = new A();   //#
+   }   
+
+}
+
+

@@ -1,0 +1,21 @@
+/*
+  @filename   er-sem53.kra
+      
+  @comment    metodo abstrato de classe nao abstrata
+  */
+
+class A {
+   
+   abstract public void m();  //#
+
+}
+
+
+class Program {
+   
+   public void run() {
+   }   
+
+}
+
+

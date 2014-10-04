@@ -1,0 +1,61 @@
+/*
+  @filename   ok-lex09.kra
+      
+  @comment    Este arquivo deve produzir tokens para cada um dos terminais da
+  linguagem
+  */
+
+class A {
+
+   private void p() { 
+   }
+   
+   final public void m() {
+      int i;
+      int j;
+      boolean b;
+      String s;
+      
+      i = ((1 * 4) + 3) - (5 / 2);
+      b = false;
+      if ( (!b && (i < 0) ) || (i > 10) ) {
+         b = true;
+         i = -1;
+         read(i, j );
+         while ( i > 0 ) {
+            write( i );
+            i = i - 1;
+            break;
+         }
+      }
+      else {
+         b = true;
+         write( i );
+      }
+      if ((((((i == 1 ) || (i < 1 )) || (i <= 5)) || (i > 1)) || (i >= 1)) || (i != 3)) {
+         i = 0;
+      }
+   }   
+
+}
+
+abstract class B extends A { 
+   private void p() { 
+      super.m();
+      this.p();
+   }
+}
+
+class Program {
+   
+   public void run() {
+      A a;
+      
+      a = null;
+      a = new A();
+      a.m();
+   }   
+
+}
+
+

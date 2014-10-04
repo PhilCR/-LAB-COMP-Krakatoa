@@ -1,0 +1,19 @@
+/*
+  @filename   er-sem84.kra
+
+  @comment    Método final sendo redeclarado
+
+*/
+class SuperProgram {
+    final public void eusoufinal() { }
+
+}
+
+class Program extends SuperProgram {
+    
+	public void eusoufinal() { }   //#
+	
+    public void run() {  
+    }
+
+}

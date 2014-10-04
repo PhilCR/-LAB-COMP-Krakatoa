@@ -7,12 +7,18 @@ import java.util.Iterator;
  */
 public class KraClass extends Type {
 	
-   public KraClass( String name ) {
+   public KraClass( String name, boolean finalFlag ) {
       super(name);
+      this.name = name;
+      this.finalFlag = finalFlag;
       //Adicionando inicializacao para null, eh util na hora de inicializar as listas dentro da classe
       // ja que se o valor nao for null entao a lista ja foi inicializada 
-      instanceVariableList = null;
-      staticInstanceList = null;
+      instanceVariableList = new InstanceVariableList();
+      staticInstanceList = new InstanceVariableList();
+      publicMethodList = new MethodList();
+      privateMethodList = new MethodList();
+      publicStaticMethodList = new MethodList(); 
+      privateStaticMethodList = new MethodList();
    }
    
    public String getCname() {
@@ -40,11 +46,87 @@ public class KraClass extends Type {
 		   
 		   InstanceVariable var = varIterator.next();
 		   //Se achar uma instancia com o nome que procuro, retorne-a
-		   if(var.getName().compareTo(name) > 0){
+		   if(var.getName().compareTo(name) == 0){
 			   return var;
 		   }
 	   }
 	   //se nao achar nenhuma, entao retorna null
+	   return null;
+   }
+   
+   public Method searchMethod(String name){
+	   Iterator<Method> iterator = publicMethodList.elements();
+	   Method m = null;
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   iterator = privateMethodList.elements();
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   iterator = publicStaticMethodList.elements();
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   iterator = privateStaticMethodList.elements();
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   return null;
+   }
+   
+   public Method searchMethodOnlyNonStatic(String name){
+	   Iterator<Method> iterator = publicMethodList.elements();
+	   Method m = null;
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   iterator = privateMethodList.elements();
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   return null;
+   }
+   
+   public Method searchMethodOnlyStatic(String name){
+	   Iterator<Method>iterator = publicStaticMethodList.elements();
+	   Method m = null;
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   System.out.println(name);
+		   //System.out.println(m.getName());
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   iterator = privateStaticMethodList.elements();
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   return null;
+   }
+   
+   public Method searchMethodOnlyNonStaticAndPublic(String name){
+	   Iterator<Method> iterator = publicMethodList.elements();
+	   Method m = null;
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
 	   return null;
    }
    
@@ -70,14 +152,34 @@ public class KraClass extends Type {
 	   //insere os elementos na lista correspondente que eles devem ser inseridos
 	   if(staticFlag){
 		   while(i.hasNext()){
-			   instanceVariableList.addElement(i.next());
+			   staticInstanceList.addElement(i.next());
 		   }
 	   }else{
 		   while(i.hasNext()){
-			   staticInstanceList.addElement(i.next());
+			   instanceVariableList.addElement(i.next());
 		   }
 	   }
 		   
+   }
+   
+   public Method addMethod(Method d, boolean staticFlag, boolean isPrivate){
+	   if(isPrivate){
+		   if(staticFlag){
+			   privateStaticMethodList.addElement(d);
+			   return privateStaticMethodList.returnLast();
+		   }else{
+			   privateMethodList.addElement(d);
+			   return privateMethodList.returnLast();
+		   }
+	   }else{
+		   if(staticFlag){
+			   publicStaticMethodList.addElement(d);
+			   return publicStaticMethodList.returnLast();
+		   }else{
+			   publicMethodList.addElement(d);
+			   return publicMethodList.returnLast();
+		   }
+	   }
    }
    
    //retorna super classe
@@ -90,12 +192,16 @@ public class KraClass extends Type {
 	   this.superclass = superclass;
    }
    
+   public boolean isFinal(){
+	   return finalFlag;
+   }
+   
    private String name;
    private KraClass superclass;
+   private boolean finalFlag;
    private InstanceVariableList instanceVariableList;
    private InstanceVariableList staticInstanceList;
-   
-   //private MethodList publicMethodList, privateMethodList, publicStaticMethodList, privateStaticMethodList;
+   private MethodList publicMethodList, privateMethodList, publicStaticMethodList, privateStaticMethodList;
    
    // métodos públicos get e set para obter e iniciar as variáveis acima,
    // entre outros métodos

@@ -1,0 +1,29 @@
+/*
+  @filename   er-sem55.kra
+      
+  @comment    redefinicao de metodo final
+  */
+
+class A {
+   
+   final public void m() {
+   }   
+
+}
+
+
+class Program  extends A {
+
+   public void m() {   //#
+   }
+   
+   public void run() {
+      A a;
+      
+      a = new A();
+      a.m();
+   }   
+
+}
+
+

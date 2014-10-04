@@ -1,0 +1,21 @@
+/*
+  @filename   er-sin47.kra
+
+  @comment    metodo abstract privado
+
+*/
+
+abstract class A {
+
+   abstract private void m() {  //#
+   }
+
+}
+
+
+class Program {
+  
+    public void run() {
+    }
+
+}

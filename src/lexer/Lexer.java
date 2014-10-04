@@ -51,11 +51,22 @@ public class Lexer {
 		keywordsTable.put( "private", Symbol.PRIVATE );
 		keywordsTable.put( "String", Symbol.STRING );
 		keywordsTable.put( "extends", Symbol.EXTENDS );
-
+		keywordsTable.put("static", Symbol.STATIC);
 	}
 
+	public Symbol lookAheadForDot(){
+		if(input[tokenPos] == '.')
+			return Symbol.DOT;
+		return null;
+	}
 
-
+	public Symbol lookAheadForAttribution(){
+		int tokenCopy = tokenPos;
+		while(input[tokenCopy] == ' ') tokenCopy++;
+		if(input[tokenCopy] == '=')
+			return Symbol.ASSIGN;
+		return null;
+	}
 
     public void nextToken() {
         char ch;

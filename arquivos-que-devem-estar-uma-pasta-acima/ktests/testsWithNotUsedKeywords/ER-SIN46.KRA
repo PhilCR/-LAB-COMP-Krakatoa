@@ -1,0 +1,21 @@
+/*
+  @filename   er-sin46.kra
+
+  @comment    metodo abstract e final
+
+*/
+
+abstract class A {
+
+   abstract final public void m() {   //#
+   }
+
+}
+
+
+class Program {
+  
+    public void run() {
+    }
+
+}

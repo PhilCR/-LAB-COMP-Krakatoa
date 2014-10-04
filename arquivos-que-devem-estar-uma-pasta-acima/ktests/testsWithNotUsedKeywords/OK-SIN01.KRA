@@ -1,0 +1,23 @@
+/*
+  @filename   ok-sin01.kra
+      
+  @comment    Confere se o sintatico admite um programa com metodos e classes vazios
+  */
+
+class A {}
+class B extends A {}
+abstract class C {}
+abstract class D extends C {}
+
+
+class Program {
+   
+   private void m() {}
+   public  void p() {}
+   
+   public void run() {
+   }   
+
+}
+
+
