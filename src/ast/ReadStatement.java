@@ -1,18 +1,26 @@
 package ast;
 
 public class ReadStatement extends Statement{
-	public void genC(PW pw){
-		
+	public void genK(PW pw){
+		String printable = "";
+		if(selfClass)
+			printable += "this.";
+		if(staticName != null)
+			printable += staticName+".";
+		printable += readable.getName();
+		pw.printlnIdent("read("+printable+");");
 	}
 	
-	public ReadStatement(Variable r, boolean self, boolean staticFlag){
+	public ReadStatement(Variable r, boolean self, String staticClassName){
 		readable = r;
 		selfClass = self;
-		this.staticFlag = staticFlag;
+		this.staticName = staticClassName;
 	}
+	
+	
 	
 	private Variable readable; 
 	private boolean selfClass;
-	private boolean staticFlag;
+	private String staticName;
 	
 }

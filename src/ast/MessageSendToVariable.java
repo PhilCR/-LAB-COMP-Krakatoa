@@ -39,8 +39,31 @@ public class MessageSendToVariable extends MessageSend {
     	}
     }
     
-    public void genC( PW pw, boolean putParenthesis ) {
+    public void genK( PW pw, boolean putParenthesis ) {
+        if(putParenthesis)
+        	pw.print("(");
         
+        if(methodCall == null && exprList == null){
+        	pw.print(classIdent.getName()+"."+variable.getName());
+        }else if(classIdent == null){
+        	pw.print(variable.getName()+"."+methodCall.getName()+"(");
+        	if(exprList != null)
+        		exprList.genK(pw);
+        	pw.print(")");
+        }else if(variable == null){
+        	pw.print(classIdent.getName()+"."+methodCall.getName()+"(");
+        	if(exprList != null)
+        		exprList.genK(pw);
+        	pw.print(")");
+        }else{
+        	pw.print(classIdent.getName()+"."+variable.getName()+"."+methodCall.getName()+"(");
+        	if(exprList != null)
+        		exprList.genK(pw);
+        	pw.print(")");
+        }
+        
+        if(putParenthesis)
+        	pw.print(")");
     }
 
     private KraClass classIdent;

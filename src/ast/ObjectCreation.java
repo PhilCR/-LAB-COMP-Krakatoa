@@ -10,9 +10,9 @@ public class ObjectCreation extends Expr{
 	}
 	
 	@Override
-	public void genC(PW pw, boolean putParenthesis) {
+	public void genK(PW pw, boolean putParenthesis) {
 		// TODO Auto-generated method stub
-		
+		pw.print("new "+classObject.getName()+"()");
 	}
 
 	@Override

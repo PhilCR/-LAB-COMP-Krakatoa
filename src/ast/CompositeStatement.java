@@ -1,8 +1,8 @@
 package ast;
 
 public class CompositeStatement extends Statement {
-	public void genC(PW pw){
-		
+	public void genK(PW pw){
+		sList.genK(pw);
 	}
 	
 	public CompositeStatement(StatementList sList){

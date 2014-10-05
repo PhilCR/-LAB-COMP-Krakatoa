@@ -12,8 +12,15 @@ public class MessageSendToSuper extends MessageSend {
         return message.getType();
     }
 
-    public void genC( PW pw, boolean putParenthesis ) {
-        
+    public void genK( PW pw, boolean putParenthesis ) {
+    	if(putParenthesis)
+    		pw.print("(");
+        pw.print("super."+message.getName()+"(");
+        if(parameters != null)
+        	parameters.genK(pw);
+        pw.print(")");
+        if(putParenthesis)
+    		pw.print(")");
     }
     
     private Method message;

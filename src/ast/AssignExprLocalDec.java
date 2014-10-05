@@ -4,8 +4,24 @@ import java.util.Iterator;
 
 public class AssignExprLocalDec extends Expr{
 	//AQUI VAI TER QUE TRATAR CASOS LOUCAMENTE 
-	public void genC( PW pw, boolean putParenthesis ) {
-		//pw.printIdent("NULL");
+	public void genK( PW pw, boolean putParenthesis ) {
+		
+		if(firstExpr == null){
+			if(localList != null){
+				Iterator<Variable> varIt = localList.elements();
+				Variable aux;
+				while(varIt.hasNext()){
+					aux = varIt.next();
+					pw.print(aux.getType().getName()+" "+aux.getName());
+				}
+			}
+		}else{
+			firstExpr.genK(pw, putParenthesis);
+			if(secondExpr != null){
+				pw.print(" = ");
+				secondExpr.genK(pw, putParenthesis);
+			}
+		}
 	}
 	   
 	public Type getType() {
@@ -21,19 +37,25 @@ public class AssignExprLocalDec extends Expr{
 	public AssignExprLocalDec(Expr first, Expr second){
 		firstExpr = first;
 		secondExpr = second;
+		localList = null;
 	}
 	
-	public AssignExprLocalDec(LocalVarList localList, Expr first){
+	/*public AssignExprLocalDec(LocalVarList localList, Expr first){
 		firstExpr = first;
 		this.localList = localList;
-	}
+		secondExpr = null;
+	}*/
 	
 	public AssignExprLocalDec(Expr first){
 		firstExpr = first;
+		localList = null;
+		secondExpr = null;
 	}
 	
 	public AssignExprLocalDec(LocalVarList localList){
 		this.localList = localList;
+		firstExpr = null;
+		secondExpr = null;
 	}
 	
 	private Expr firstExpr;

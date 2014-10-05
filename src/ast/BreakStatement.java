@@ -1,8 +1,8 @@
 package ast;
 
 public class BreakStatement extends Statement{
-	public void genC(PW pw){
-		pw.println("break;");
+	public void genK(PW pw){
+		pw.printlnIdent("break;");
 	}
 	
 	

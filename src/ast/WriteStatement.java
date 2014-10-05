@@ -1,8 +1,16 @@
 package ast;
 
 public class WriteStatement extends Statement{
-	public void genC(PW pw){
-		
+	public void genK(PW pw){
+		if(insideFlag){
+			pw.printIdent("write(");
+			exprList.genK(pw);
+			pw.print(");");
+		}else{
+			pw.printIdent("write(");
+			exprList.genK(pw);
+			pw.print(");");
+		}
 	}
 	
 	public WriteStatement(ExprList exprList, boolean flagIn){

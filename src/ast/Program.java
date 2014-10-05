@@ -9,7 +9,13 @@ public class Program {
 	}
 
 
-	public void genC(PW pw) {
+	public void genK(PW pw) {
+		Iterator<KraClass> kraIterator = classList.iterator();
+		while(kraIterator.hasNext()){
+			KraClass klass = kraIterator.next();
+			pw.println("");
+			klass.genK(pw);;
+		}
 	}
 
 	private ArrayList<KraClass> classList;

@@ -3,6 +3,7 @@ package comp;
 
 import ast.*;
 import lexer.*;
+
 import java.io.*;
 import java.util.*;
 
@@ -54,9 +55,10 @@ public class Compiler {
 				foundProgram = true;
 			}
 		}
+		
 		if(!foundProgram)
 			error.show("Couldn't find class Program.");
-		return new Program(new ArrayList<KraClass>());
+		return new Program(kList);
 	}
 
 	private KraClass classDec() {
@@ -74,7 +76,6 @@ public class Compiler {
 		 * Qualifier ::= [ "static" ]  ( "private" | "public" )
 		 */
 		boolean finalFlag = false;
-		boolean programClass = false;
 		if(lexer.token == Symbol.FINAL){
 			finalFlag = true;
 			lexer.nextToken();
@@ -624,6 +625,7 @@ public class Compiler {
 		lexer.nextToken();
 		boolean self = false;
 		boolean staticFlag = false;
+		String staticClassName = null;
 		Variable v = null;
 		while (true) {
 			if ( lexer.token == Symbol.THIS ) {
@@ -639,6 +641,7 @@ public class Compiler {
 				v = currentClass.searchInstance(name, false);
 			}else{
 				if(isType(name)){
+					staticClassName = name;
 					lexer.nextToken();
 					staticFlag = true;
 					if ( lexer.token != Symbol.DOT ) error.show(". expected");
@@ -674,8 +677,10 @@ public class Compiler {
 		if ( lexer.token != Symbol.SEMICOLON )
 			error.show(CompilerError.semicolon_expected);
 		lexer.nextToken();
-		
-		return new ReadStatement(v, self, staticFlag);
+		if(staticFlag)
+			return new ReadStatement(v, self, staticClassName);
+		else
+			return new ReadStatement(v, self, null);
 	}
 
 	private WriteStatement writeStatement() {
@@ -710,6 +715,16 @@ public class Compiler {
 		ExprList eList = exprList();
 		if ( lexer.token != Symbol.RIGHTPAR ) error.show(") expected");
 		lexer.nextToken();
+		Iterator<Expr> ex = eList.elements();
+		while(ex.hasNext()){
+			Expr aux = ex.next();
+			if(aux != null){
+				if(aux.getType().getName().compareTo("boolean") == 0)
+					error.show("Can't write to boolean.");
+				if(isType(aux.getType().getName()))
+					error.show("Can't write to objects");
+			}
+		}
 		if ( lexer.token != Symbol.SEMICOLON )
 			error.show(CompilerError.semicolon_expected);
 		lexer.nextToken();
@@ -1025,13 +1040,24 @@ public class Compiler {
 						 * Contudo, se variáveis estáticas não estiver nas especificações,
 						 * sinalize um erro neste ponto.
 						 */
+						KraClass klass = symbolTable.getInGlobal(firstId);
+						if(klass == null)
+							error.show("Couldn't find class to make static instance call.");
+						
+						Variable var = klass.searchInstance(ident, true);
+						if(var == null)
+							error.show("Couldn't find static instance.");
 						lexer.nextToken();
 						if ( lexer.token != Symbol.IDENT )
 							error.show("Identifier expected");
 						messageName = lexer.getStringValue();
+						Method message = klass.searchMethodOnlyNonStatic(messageName);
+						if(message == null)
+							error.show("Couldn't find static method for static instance.");
 						lexer.nextToken();
 						exprList = this.realParameters();
-						
+						//KraClass k, Variable v, Method methodCall, ExprList e
+						return new MessageSendToVariable(klass, var, message, exprList);
 					}
 					else if ( lexer.token == Symbol.LEFTPAR ) {
 						Variable v = null;

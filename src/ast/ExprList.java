@@ -12,14 +12,15 @@ public class ExprList {
         exprList.add(expr);
     }
 
-    public void genC( PW pw ) {
+    public void genK( PW pw ) {
 
         int size = exprList.size();
         for ( Expr e : exprList ) {
-        	e.genC(pw, false);
+            e.genK(pw, false);
             if ( --size > 0 )
-                pw.print(", ");
-        }
+               pw.print(", ");
+            }
+        
     }
     
     public Iterator<Expr> elements(){

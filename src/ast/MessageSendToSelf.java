@@ -41,7 +41,28 @@ public class MessageSendToSelf extends MessageSend {
         return methodCall.getType();
     }
     
-    public void genC( PW pw, boolean putParenthesis ) {
+    public void genK( PW pw, boolean putParenthesis ) {
+    	if(putParenthesis)
+        	pw.print("(");
+        
+        if(instance == null && eList == null & methodCall == null){
+        	pw.print("this");
+        }else if(methodCall == null && eList == null){
+        	pw.print("this."+instance.getName());
+        }else if(instance == null){
+        	pw.print("this."+methodCall.getName()+"(");
+        	if(eList != null)
+        		eList.genK(pw);
+        	pw.print(")");
+        }else{
+        	pw.print("this."+instance.getName()+"."+methodCall.getName()+"(");
+        	if(eList != null)
+        		eList.genK(pw);
+        	pw.print(")");
+        }
+        
+        if(putParenthesis)
+        	pw.print(")");
     }
     
     private KraClass thisClass;

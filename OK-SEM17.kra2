@@ -1,0 +1,39 @@
+
+class A  {
+   private int n;
+
+   private static int n;
+
+   public int get(){
+
+      return this.n;
+
+   }
+   public void set(int n){
+      this.n = n;
+
+   }
+   static public int get(){
+
+      return A.n;
+
+   }
+   static public void set(int n){
+      A.n = n;
+
+   }
+}
+
+class Program  {
+
+
+   public void run(){
+      A a;
+      a = new A();
+      a.set(0);
+      write(a.get());
+      A.set(1);
+      write(A.get());
+
+   }
+}

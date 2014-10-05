@@ -12,6 +12,10 @@ public class Variable {
     public Type getType() {
         return type;
     }
+    
+    public void genK(PW pw){
+    	pw.print(type.getName()+" "+name);
+    }
 
     private String name;
     private Type type;

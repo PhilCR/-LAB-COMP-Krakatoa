@@ -57,6 +57,27 @@ public class Method {
 		return this.finalFlag;
 	}
 	
+	public void genK(PW pw){
+		pw.print(t.getName()+" "+name+"(");
+		if(formalParamList != null){
+			Iterator<Variable> paramIt = formalParamList.elements();
+			while(paramIt.hasNext()){
+				paramIt.next().genK(pw);
+				if(paramIt.hasNext())
+					pw.print(", ");
+			}
+		}
+		pw.print("){");
+		pw.println("");
+		pw.add();
+		//pw.printIdent("");
+		sList.genK(pw);
+		
+		pw.sub();
+		pw.println("");
+		pw.printlnIdent("}");
+	}
+	
 	private Type t;
 	private StatementList sList;
 	private ParamList formalParamList;

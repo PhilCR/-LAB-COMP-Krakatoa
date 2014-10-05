@@ -7,9 +7,11 @@ public class AssignStatement extends Statement{
 	}
 	
 	@Override
-	public void genC(PW pw) {
+	public void genK(PW pw) {
 		// TODO Auto-generated method stub
-		
+		pw.printIdent("");
+		assignExpr.genK(pw, false);
+		pw.print(";");
 	}
 
 	private Expr assignExpr;

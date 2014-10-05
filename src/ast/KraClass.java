@@ -105,8 +105,6 @@ public class KraClass extends Type {
 	   Method m = null;
 	   while(iterator.hasNext()){
 		   m = iterator.next();
-		   System.out.println(name);
-		   //System.out.println(m.getName());
 		   if(m.getName().compareTo(name) == 0)
 			   return m;
 	   }
@@ -194,6 +192,75 @@ public class KraClass extends Type {
    
    public boolean isFinal(){
 	   return finalFlag;
+   }
+   
+   public void genK(PW pw){
+	   String initialPrint = "";
+	   if(finalFlag){
+		   initialPrint += "final ";
+	   }
+	   initialPrint += "class "+name+" ";
+	   if(superclass != null){
+		   initialPrint += "extends "+superclass.getName();
+	   }
+	   initialPrint += " {";
+	   pw.printlnIdent(initialPrint);
+	   pw.add();
+	   
+	   Iterator<InstanceVariable> instIt = instanceVariableList.elements();
+	   
+	   while(instIt.hasNext()){
+		   pw.printIdent("private ");
+		   instIt.next().genK(pw);
+		   pw.print(";");
+		   pw.println("");
+	   }
+	   pw.println("");
+	   instIt = staticInstanceList.elements();
+	   
+	   while(instIt.hasNext()){
+		   pw.printIdent("private static ");
+		   instIt.next().genK(pw);
+		   pw.print(";");
+		   pw.println("");
+	   }
+	   pw.println("");
+	   Method aux = null;
+	   Iterator<Method> methodIt = publicMethodList.elements();
+	   while(methodIt.hasNext()){
+		   aux = methodIt.next();
+		   if(aux.isFinal()){
+			   pw.printIdent("final public ");
+		   }else{
+			   pw.printIdent("public ");
+		   }
+		   
+		   aux.genK(pw);
+	   }
+	   
+	   methodIt = privateMethodList.elements();
+	   while(methodIt.hasNext()){
+		   aux = methodIt.next();
+		   pw.printIdent("private ");
+		   aux.genK(pw);
+	   }
+	   
+	   methodIt = publicStaticMethodList.elements();
+	   while(methodIt.hasNext()){
+		   aux = methodIt.next();
+		   pw.printIdent("static public ");
+		   aux.genK(pw);
+	   }
+	   
+	   methodIt = privateStaticMethodList.elements();	
+	   while(methodIt.hasNext()){
+		   aux = methodIt.next();
+		   pw.printIdent("static private ");
+		   aux.genK(pw);
+	   }
+	   
+	   pw.sub();
+	   pw.printlnIdent("}");
    }
    
    private String name;
