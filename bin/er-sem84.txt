@@ -1,0 +1,2 @@
+14 : Trying to redefine method that is final in superclass.
+	public void eusoufinal() { }   //#

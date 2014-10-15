@@ -1,0 +1,2 @@
+12 : The class Program is trying to extend from a class that is final.
+class Program extends Terra {  //#

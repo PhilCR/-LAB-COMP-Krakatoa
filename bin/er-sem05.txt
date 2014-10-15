@@ -1,0 +1,2 @@
+12 : Type error: types do not match between expressions.
+      b = 0;   //#

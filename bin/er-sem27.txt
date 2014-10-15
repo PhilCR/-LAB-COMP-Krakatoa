@@ -1,0 +1,2 @@
+7 : Trying to extend class from itself.
+class A extends A {   //#

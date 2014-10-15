@@ -1,0 +1,2 @@
+21 : Cannot use expression as instruction.
+      a.m();            //#

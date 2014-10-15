@@ -1,0 +1,2 @@
+22 : Couldn't find method p in any of the superclasses of B
+       super.p();   //#

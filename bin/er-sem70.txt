@@ -1,0 +1,2 @@
+12 : Redeclaration of private method m
+    private void m() {   //#

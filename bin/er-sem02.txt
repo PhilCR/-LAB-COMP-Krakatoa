@@ -1,0 +1,2 @@
+12 : Identifier not found in method or inside class.
+       I = 0;      //#

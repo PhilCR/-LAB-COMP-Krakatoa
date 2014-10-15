@@ -1,0 +1,2 @@
+20 : Type error, return statement is of class type from method
+      return new A();   //#

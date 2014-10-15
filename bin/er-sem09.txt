@@ -1,0 +1,2 @@
+12 : int type not compatible with logical operations.
+      i = (3 && 4) || 5;      //#

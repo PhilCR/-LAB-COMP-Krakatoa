@@ -1,0 +1,2 @@
+12 : Can't read boolean
+      read( b );  //#

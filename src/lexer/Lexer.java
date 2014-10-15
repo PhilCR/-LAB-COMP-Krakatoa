@@ -1,3 +1,9 @@
+/*
+ * @author Rodrigo Nascimento de Carvalho 380067
+ * @author Philippe César Ramos 380415
+ * */
+
+
 package lexer;
 
 import java.util.*;
@@ -54,6 +60,7 @@ public class Lexer {
 		keywordsTable.put("static", Symbol.STATIC);
 	}
 
+	//duas funções que procuram se a proxima token é um ponto ou atribuição, utilizada para tirar a ambiguidade de AssingExprLocalDec.
 	public Symbol lookAheadForDot(){
 		if(input[tokenPos] == '.')
 			return Symbol.DOT;

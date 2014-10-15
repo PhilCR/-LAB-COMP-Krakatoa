@@ -1,3 +1,7 @@
+/*
+ * @author Rodrigo Nascimento de Carvalho 380067
+ * @author Philippe César Ramos 380415
+ * */
 
 package comp;
 
@@ -12,13 +16,19 @@ public class Compiler {
 	// compile must receive an input with an character less than
 	// p_input.lenght
 	public Program compile(char[] input, PrintWriter outError) {
-
+		//inicializar o objeto de exibição do erros
 		error = new CompilerError(new PrintWriter(outError));
+		//inicializar tabela de simbolos
 		symbolTable = new SymbolTable();
+		
+		//inicializar um lexer
 		lexer = new Lexer(input, error);
 		error.setLexer(lexer);
+		//inicializa variavel que vai contar se estamos dentro de um whilestatement e quantos while statements são
 		insideWhile = 0;
 		
+		//inicializa programa com null, vai pro nextToken(), se ja for fim de arquivo, entao finaliza, caso contrario entra na chamada de metodo program() e começa a construir a ASA
+		// ao fim verifica se chegou a End of FIle e exibe erro em caso de problemas. 
 		Program program = null;
 		try {
 			lexer.nextToken();
@@ -35,29 +45,35 @@ public class Compiler {
 			// of course, it should be removed if the compiler were
 			// a production compiler.
 
-			e.printStackTrace();
+			//e.printStackTrace();
 			program = null;
 		}
 
 		return program;
 	}
 
+	//
 	private Program program() {
 		// Program ::= KraClass { KraClass }
+		//Um programa nada mais é do que um conjunto de classes 
 		ArrayList<KraClass> kList = new ArrayList<KraClass>();
+		//Adiciona uma classe a lista de kClasses, chamando classDec()
 		kList.add(classDec());
+		//Enquanto o simbolo é Class ou Final significa que temos mais classes a serem analisadas, portanto kList adiciona classe que vemde classDec()
 		while (lexer.token == Symbol.CLASS || lexer.token == Symbol.FINAL)
 			kList.add(classDec());
 		
+		//Verificação se existe uma classe Program (equivalente a um Main) dentro do programa definido.
 		boolean foundProgram = false;
 		for(KraClass k : kList){
 			if(k.getCname().compareTo("Program") == 0){
 				foundProgram = true;
 			}
 		}
-		
+		//Se não achar programa algum, disparar erro no compilador.
 		if(!foundProgram)
 			error.show("Couldn't find class Program.");
+		//retorne um novo Programa com uma lista de classes.
 		return new Program(kList);
 	}
 
@@ -75,7 +91,9 @@ public class Compiler {
 		 * MethodDec ::= Qualifier Type Id "("[ FormalParamDec ] ")" "{" StatementList "}" 
 		 * Qualifier ::= [ "static" ]  ( "private" | "public" )
 		 */
+		//finalFlag indica se a classe eh final ou nao
 		boolean finalFlag = false;
+		//se simbolo for final, finalFlag indica que a classe eh final e vai pro proximo token
 		if(lexer.token == Symbol.FINAL){
 			finalFlag = true;
 			lexer.nextToken();
@@ -84,30 +102,36 @@ public class Compiler {
 		lexer.nextToken();
 		if ( lexer.token != Symbol.IDENT )
 			error.show(CompilerError.ident_expected);
+		//pega o nome da classe do string value do lexer, e já o adiciona na tabela de simbolos global, ja indicando se a mesma eh final ou nao
 		String className = lexer.getStringValue();
 		symbolTable.putInGlobal(className, new KraClass(className, finalFlag));
 		// Pegando referencia de classe do hashmap pra poder modificar como necessario
+		//ref recebe uma referencia da symboltable, que conforme suas modificações e adições de metodos forem realizadaas
+		//haverão então reflexões na symbolTable diretamente
 		KraClass ref = symbolTable.getInGlobal(className);
+		//currentClass recebe ref, para podermos em qualquer local do codigo descobrir em que classe estamos situados
 		currentClass = ref; 
 		lexer.nextToken();
 		if ( lexer.token == Symbol.EXTENDS ) {
 			lexer.nextToken();
 			if ( lexer.token != Symbol.IDENT )
 				error.show(CompilerError.ident_expected);
+			//superclassName pega seu valor da string do lexer
 			String superclassName = lexer.getStringValue();
+			//verifica entao se a classe nao esta tentando herdar de si 
 			if(superclassName.compareTo(className) == 0){
 				error.show("Trying to extend class from itself.");
 			}
-			//procurando a super classe caso a mesma exista 
+			//procurando a super classe caso a mesma nao exista, entao sinaliza erro para o compilador
 			KraClass superclass = symbolTable.getInGlobal(superclassName);
 			if(superclass == null)
 				error.show("Cannot extend from Super class "+superclassName+", the class doesn't exist");
+			//se a superclasse é final, entao a classe atual nao pode herdar de superclasse, sinaliza erro
 			if(superclass.isFinal())
 				error.show("The class "+className+" is trying to extend from a class that is final.");
 			//se a classe nao eh encontrada na symbol table entao sinalizar erro
 			
 			//se tudo der certo, entao setar superclasse da KraClass =)
-			
 			ref.setSuperClass(superclass);
 			lexer.nextToken();
 		}
@@ -120,14 +144,17 @@ public class Compiler {
 			Symbol qualifier;
 			//adicionando flag para verificar se houve declaracao disso como static
 			boolean staticFlag;
+			//verificao para metodo final 
 			boolean finalMethodFlag;
 			
+			//se um metodo final eh encontrado, entao a flag para metodo final se torna true
 			if(lexer.token == Symbol.FINAL){
 				lexer.nextToken();
 				finalMethodFlag = true;
 			}else{
 				finalMethodFlag = false;
 			}
+			//se ha ambos metodos finais e a classe é final, isso não é permitido pela linguagem, sinaliza erro
 			if(finalMethodFlag == true && finalFlag == true){
 				error.show("A final class can't have final methods.");
 			}
@@ -154,11 +181,14 @@ public class Compiler {
 			Type t = type();
 			if ( lexer.token != Symbol.IDENT )
 				error.show("Identifier expected");
+			
 			String name = lexer.getStringValue();
 			Method m = null;
 			lexer.nextToken();
 			if ( lexer.token == Symbol.LEFTPAR ){
+				//se o nome do metodo é run e classe atual é Program
 				if(name.compareTo("run") == 0 && currentClass.getName().compareTo("Program") == 0){
+					//fazer todas as verificações se o tipo de run é void, se não é static e não é privado, caso contrário sinaliza erro.
 					if(t.getName().compareTo("void") != 0)
 						error.show("Method run in class Program can't return void.");
 					if(staticFlag)
@@ -166,30 +196,39 @@ public class Compiler {
 					if(qualifier == Symbol.PRIVATE)
 						error.show("Method run in class Program can't be private.");
 				}
+				//procura se instancia com nome de metodo ja existe
 				Variable aux = currentClass.searchInstance(name, false);
+				//se sim, sinaliza erro
 				if(aux != null){
 					error.show("Method "+name+" has the same name as instance.");
 				}
+				//se o metodo é estatico, entao a procura por metodos de mesmo nome se da de forma diferente
 				if(staticFlag){
 					m = currentClass.searchMethodOnlyStatic(name);
 				}else{
 					m = currentClass.searchMethodOnlyNonStatic(name);
 				}
+				//se um método com mesmo nome foi encontrado, então indica erro, sendo este diferenciado para metodos estaticos 
 				if(m != null){
 					if(staticFlag)
 						error.show("Redeclaration of "+ qualifier +" static method "+name);
 					error.show("Redeclaration of "+ qualifier +" method "+name);
 				}
 				if(qualifier == Symbol.PRIVATE){
-					if(finalFlag == true)
+					//se uma metodo é final, então ele não pode ser privado.
+					if(finalMethodFlag == true)
 						error.show("It is not possible to declare a final private method inside a class.");
+					//cria novo metodo e seta currentMethod
 					m = new Method(t, name, true, staticFlag, finalMethodFlag);
 					currentMethod = ref.addMethod(m, staticFlag, true);
 				}else{
+					//diferença é que este método naõ é privado, por isso um dos valores passados é false.
 					m = new Method(t, name, false, staticFlag, finalMethodFlag);
 					currentMethod = ref.addMethod(m, staticFlag, false);
 				}
+				//hasReturn é setado como false, para podermos verificar se um método com retorno tem realmente pelo menos um retorno
 				hasReturn = false;
+				//chama methodDec para verificar statements
 				methodDec(t, name);
 			}else if ( qualifier != Symbol.PRIVATE){
 				error.show("Attempt to declare a public instance variable");
@@ -203,12 +242,14 @@ public class Compiler {
 		
 		if ( lexer.token != Symbol.RIGHTCURBRACKET )
 			error.show("public/private or \"}\" expected");
+		//se a classe é Program, procura-se um método run, se ele não existir, indica-se erro.
 		if(currentClass.getName().compareTo("Program") == 0){
 			if(currentClass.searchMethod("run") == null){
 				error.show("Class Program needs to have a method run().");
 			}
 		}
 		lexer.nextToken();
+		//retorna classe
 		return ref;
 	}
 
@@ -238,6 +279,7 @@ public class Compiler {
 			if((currentClass.searchInstance(variableName, staticFlag)) == null)
 				varList.addElement(new InstanceVariable(variableName, type));
 			else{
+				//sinalização de erros especifica para instancias estaticas ou não
 				if(staticFlag)
 					error.show("Duplicate declaration for static instance "+name);
 				else
@@ -248,6 +290,7 @@ public class Compiler {
 			error.show(CompilerError.semicolon_expected);
 		
 		lexer.nextToken();
+		//retorna varList que simboliza instanceVarList
 		return varList;
 	}
 
@@ -263,11 +306,16 @@ public class Compiler {
 		if ( lexer.token != Symbol.RIGHTPAR ) formalParamList = formalParamDec();
 		if ( lexer.token != Symbol.RIGHTPAR ) error.show(") expected");
 		
+		//se o método for run e a classe atual é programa e há parametros no metodo run, então sinaliza erros.
 		if(currentMethod.getName().compareTo("run") == 0 && currentClass.getName().compareTo("Program") == 0){
 			if(formalParamList != null)
 				error.show("Class Program cannot have method run with parameters.");
 		}
+		//procura metodo nas superclasses da classe atual
 		Method superMethod = findMethodInSuperClass();
+		//se ele for diferente de null e for final, há a sinalização de erro de redefinição de metodo
+		//se ele for de um tipo diferente, então sinaliza erro que há a redefinição de um método com retorno diferente
+		//se a quantidade de parametros ou tipos do parametros é diferente, também sinaliza erro para a redefinição do método da super classe.
 		if(superMethod != null){
 			if(superMethod.isFinal())
 				error.show("Trying to redefine method that is final in superclass.");
@@ -285,6 +333,7 @@ public class Compiler {
 
 		lexer.nextToken();
 		sList = statementList();
+		//se o tipo do método atual for void e há return, então sinalize erro, caso contrário se não houver return para um método que tem return, também sinaliza erro.
 		if(currentMethod.getType().getName().compareTo("void") == 0){
 			if(hasReturn){
 				error.show("Method "+currentMethod.getName()+" shouldnt have a return statement of any type.");
@@ -297,8 +346,10 @@ public class Compiler {
 		//ao fim da analise de metodo, pra nao me esquecer, limpe a localTable
 		lexer.nextToken();
 		symbolTable.removeLocalIdent();
+		//se o metodo tem statements, então este atributo é setado no objeto currentMethod pertencente a ASA
 		if(sList != null)
 			currentMethod.setStatementList(sList);
+		//o mesmo para a lisa de parametros
 		if(formalParamList != null)
 			currentMethod.setParamList(formalParamList);
 		
@@ -315,6 +366,7 @@ public class Compiler {
 		Variable v = new Variable(lexer.getStringValue(), type);
 		//Vou adicionando os elementos na lista 
 		localDecList.addElement(v);
+		//se não ha variaveis declaradas localmente com o mesmo nome, então adicione na tabela local de simbolos, senão sinaliza erro
 		if(symbolTable.getInLocal(lexer.getStringValue()) == null){
 			symbolTable.putInLocal(lexer.getStringValue(), v);
 		}else{
@@ -328,6 +380,7 @@ public class Compiler {
 			//Conforme o loop vai rodando tambem vou adicionando 
 			v = new Variable(lexer.getStringValue(), type);
 			localDecList.addElement(v);
+			//Mesma verificação de redeclaração previa
 			if(symbolTable.getInLocal(lexer.getStringValue()) == null){
 				symbolTable.putInLocal(lexer.getStringValue(), v);
 			}else{
@@ -418,6 +471,7 @@ public class Compiler {
 			
 			//uso o metodo getInGlobal para procurar a definicao da classe na tabela global 
 			result = symbolTable.getInGlobal(lexer.getStringValue());
+			//se o resultado é null, então a classe não existe.
 			if(result == null) error.show(lexer.getStringValue()+" is not a class");
 			break;
 		default:
@@ -525,19 +579,27 @@ public class Compiler {
 			if ( lexer.token == Symbol.ASSIGN ) {
 				lexer.nextToken();
 				second = expr();
+				//se o tipo é uma classe, então devemos verificar se a segunda expressão é conversivel a primeira
 				if(isType(first.getType().getName())){
+					//se a segunda for do tipo null, ja sinaliza erro
 					if(second.getType().getName().compareTo("null") != 0){
+						//caso contrario check recebe o retorno do metodo checkClassType que verifica se é conversivel
 						boolean check = checkClassType(first.getType(), second.getType());
+						
+						//se não é conversivel, sinaliza erro
 						if(!check){
 							error.show("Type error: second type is not convertible to the type of first expression.");
 						}
 					}
 				}else{
+					//caso contrario se os tipos são simples, apenas compara pelos tipos mesmo.
 					if(first.getType().getName().compareTo(second.getType().getName()) != 0)
 						error.show("Type error: types do not match between expressions.");
 				}
 			}
+			//se ambos são diferentes de nulo
 			if(first != null && second == null){
+				//compara pra ver se o primeiro não é void, e se é inteiro então sinaliza erro de expressão como instrução
 				if(first.getType().getName().compareTo("void") != 0){
 					if(first.getType().getName().compareTo("int") == 0)
 						error.show("Cannot use expression as instruction.");
@@ -566,16 +628,19 @@ public class Compiler {
 	}
 
 	private WhileStatement whileStatement() {
+		//incrementa insideWhile toda vez que entra neste método, para sabermos quantos loops estão aninhados
 		insideWhile++;
 		lexer.nextToken();
 		if ( lexer.token != Symbol.LEFTPAR ) error.show("( expected");
 		lexer.nextToken();
 		Expr e = expr();
+		//se o tipo da expressão dentro do loop não for booleana, então sinaliza erro.
 		if(e.getType().getName().compareTo("boolean") != 0)
 			error.show("Expression inside while statement needs to of boolean type.");
 		if ( lexer.token != Symbol.RIGHTPAR ) error.show(") expected");
 		lexer.nextToken();
 		Statement s = statement();
+		//vamos sair do while, decrementa
 		insideWhile--;
 		return new WhileStatement(e, s);
 	}
@@ -603,11 +668,14 @@ public class Compiler {
 
 		lexer.nextToken();
 		Expr e = expr();
+		//se o tipo de retorno é classe, há a necessidade de fazer a verificação de conversibilidade
 		if(isType(e.getType().getCname())){
+			//se a classe tem tipo diferente do de retorno do método, sinaliza erro que o método de retorno está diferente do definido no método
 			if(!checkClassType(currentMethod.getType(), e.getType())){
 				error.show("Type error, return statement is of class type from method");
 			}
 		}else{
+			//se o método atual tem tipo diferente e é tipo básico, também sinaliza o mesmo erro.
 			if(currentMethod.getType().getName().compareTo(e.getType().getName()) != 0)
 				error.show("Return statement different from type of method.");
 		}
@@ -623,8 +691,10 @@ public class Compiler {
 		lexer.nextToken();
 		if ( lexer.token != Symbol.LEFTPAR ) error.show("( expected");
 		lexer.nextToken();
+		//self, staticFlag são utilizados para verificar se há this. ou variaveis estaticas
 		boolean self = false;
 		boolean staticFlag = false;
+		//staticClassName é usada para ver se estamos chamando uma classe estática diretamente.
 		String staticClassName = null;
 		Variable v = null;
 		while (true) {
@@ -637,10 +707,12 @@ public class Compiler {
 			if ( lexer.token != Symbol.IDENT )
 				error.show(CompilerError.ident_expected);
 			String name = lexer.getStringValue();
+			//se é this, v recebe instancia da classe atual.
 			if(self){
 				v = currentClass.searchInstance(name, false);
 			}else{
 				if(isType(name)){
+					//se o identificador é uma classe, é chamada estatica.
 					staticClassName = name;
 					lexer.nextToken();
 					staticFlag = true;
@@ -648,11 +720,13 @@ public class Compiler {
 					lexer.nextToken();
 					String staticName = lexer.getStringValue();
 					v = currentClass.searchInstance(staticName, true);
+					//se não achar a instancia sinalizar erro
 					if(v == null)
 						error.show("Could not find static variable "+staticName);
 				}else{
 					if(symbolTable.getInLocal(name) == null){
 						v = currentClass.searchInstance(name, false);
+						//não achou instancia local declarada.
 						if(v == null)
 							error.show("Could not find reference to the instance to be read");
 					}else
@@ -668,9 +742,11 @@ public class Compiler {
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) error.show(") expected");
 		lexer.nextToken();
+		//verificação de tipos, read nao pode ler boolean
 		if(v.getType().getName().compareTo("boolean") == 0){
 			error.show("Can't read boolean");
 		}
+		//read não pode também ler objetos de classes.
 		if(isType(v.getType().getName())){
 			error.show("Can't read objects.");
 		}
@@ -694,6 +770,7 @@ public class Compiler {
 		Iterator<Expr> ex = eList.elements();
 		while(ex.hasNext()){
 			Expr aux = ex.next();
+			//verificação de erros, não é possível escrever em booleans, nem escrever em objetos.
 			if(aux != null){
 				if(aux.getType().getName().compareTo("boolean") == 0)
 					error.show("Can't write to boolean.");
@@ -719,6 +796,7 @@ public class Compiler {
 		while(ex.hasNext()){
 			Expr aux = ex.next();
 			if(aux != null){
+				//verificação de erros, não é possível escrever em booleans, nem escrever em objetos.
 				if(aux.getType().getName().compareTo("boolean") == 0)
 					error.show("Can't write to boolean.");
 				if(isType(aux.getType().getName()))
@@ -735,10 +813,11 @@ public class Compiler {
 		lexer.nextToken();
 		if ( lexer.token != Symbol.SEMICOLON )
 			error.show(CompilerError.semicolon_expected);
-		lexer.nextToken();
+		//se o break é chamado fora de um while, então sinaliza erros.
 		if(insideWhile <= 0){
 			error.show("Break outside while.");
 		}
+		lexer.nextToken();
 		return new BreakStatement();
 	}
 
@@ -768,10 +847,12 @@ public class Compiler {
 			lexer.nextToken();
 			Expr right = simpleExpr();
 			if(op == Symbol.EQ || op == Symbol.NEQ){
+				//checagem de tipo feita assim como nos outros método que contém verificação de conversibilidade e tipos simples.
 				if(isType(left.getType().getName()) && isType(right.getType().getName())){
 					boolean check = checkClassType(left.getType(), right.getType());
 					if(!check){
 						check = checkClassType(right.getType(), left.getType());
+						
 						if(!check)
 							error.show("Trying to compare different types");
 					}
@@ -800,13 +881,16 @@ public class Compiler {
 				|| op == Symbol.OR) {
 			lexer.nextToken();
 			Expr right = term();
+			// operações não são validas para objetos;
 			if(isType(right.getType().getName()) || isType(left.getType().getName()))
 				error.show("Operation invalid for objects.");
 			if(op == Symbol.MINUS || op == Symbol.PLUS){
+				//operações de + e - não podem ser feitas com boolean
 					if(right.getType().getName().compareTo("boolean") == 0 || left.getType().getName().compareTo("boolean") == 0)
 						error.show("Boolean type not compatible with arithmetic operations.");
 			}
 			if(op == Symbol.OR){
+				//OU não pode ser feito entre dois ints
 					if(right.getType().getName().compareTo("int") == 0 || left.getType().getName().compareTo("int") == 0)
 						error.show("int type not compatible with logical operations.");
 			}
@@ -833,8 +917,10 @@ public class Compiler {
 		if ( (op = lexer.token) == Symbol.PLUS || op == Symbol.MINUS ) {
 			lexer.nextToken();
 			Expr e = factor();
+			//expressão unaria não é compativel com objetos
 			if(isType(e.getType().getName()))
 				error.show("Unary operation not compatible for objects.");
+			//e nem com booleans
 			if(e.getType().getName().compareTo("boolean") == 0)
 				error.show("Unary operation not valid for boolean.");
 			return new SignalExpr(op, e);
@@ -895,8 +981,10 @@ public class Compiler {
 		case NOT:
 			lexer.nextToken();
 			e = expr();
+			//operação de NOT não pode ser utilizada com objetos.
 			if(isType(e.getType().getName()))
 				error.show("Cannot use NOT operation in an object.");
+			//operação de NOT não pode ser usada com int
 			if(e.getType().getName().compareTo("int") == 0)
 				error.show("NOT operation not valid for int.");
 			return new UnaryExpr(e, Symbol.NOT);
@@ -917,6 +1005,7 @@ public class Compiler {
 			 *      if ( aClass == null ) ...
 			 */
 			ObjectCreation obj = null;
+			//verifica se a classe existe, se não existe, estamos tentando chamar a criação de um objeto de uma classe que não existe.
 			if(isType(className)){
 				KraClass c = symbolTable.getInGlobal(className);
 				obj = new ObjectCreation(c);
@@ -954,7 +1043,7 @@ public class Compiler {
 			if ( lexer.token != Symbol.IDENT )
 				error.show("Identifier expected");
 			messageName = lexer.getStringValue();
-			
+			//procura metodo nas superclasses da classe atual
 			KraClass superClass = currentClass.getSuperClass();
 			Method m = null;
 			while(superClass != null){
@@ -970,15 +1059,18 @@ public class Compiler {
 			 */
 			lexer.nextToken();
 			exprList = realParameters();
-			
+			//se o método é null, então esse método não foi achado nas superclasses, sinaliza erro
 			if(m == null)
 				error.show("Couldn't find method "+messageName+" in any of the superclasses of "+currentClass.getCname());
 			else{
 				if(exprList != null){
+					//se o tamanho da lista de parametros do metodo e os valores passados ao mesmo são de tamanhos diferentes, já sinaliza erro.
 					if(m.getParamListSize() != exprList.getSize())
 						error.show("Number of parameters wrong in method call "+m.getName());
 					Iterator<Variable> iterVar = m.getParamElements();
 					Iterator<Expr> iterExpr = exprList.elements();
+					//caso contrário, compara os parâmetros e os valores com relação a tipos e verifica para tipos simples e classes se é conversivel a passagem desses parametros, e então sinaliza erro se não
+					//satisfaz essas condiçoes
 					while(iterVar.hasNext() && iterExpr.hasNext()){
 						Variable v = iterVar.next();
 						Expr ex = iterExpr.next();
@@ -1015,9 +1107,11 @@ public class Compiler {
 				v = symbolTable.getInLocal(firstId);
 				if (v == null){
 					v = currentClass.searchInstance(firstId, false);
+					//se achar instancia, dá erro de uso dela sem this. 
 					if(v != null)
 						error.show("Using instance variable without 'this'.");
 				}
+				//se não achou nada, indica erro de que nada foi achado
 				if(v == null)
 					error.show("Identifier not found in method or inside class.");
 				return new VariableExpr(v);
@@ -1041,10 +1135,12 @@ public class Compiler {
 						 * sinalize um erro neste ponto.
 						 */
 						KraClass klass = symbolTable.getInGlobal(firstId);
+						//se a classe não é encontrada, a chamada estática não é válida.
 						if(klass == null)
 							error.show("Couldn't find class to make static instance call.");
 						
 						Variable var = klass.searchInstance(ident, true);
+						//se não acharmos a variavel estatica, tambem indica erro
 						if(var == null)
 							error.show("Couldn't find static instance.");
 						lexer.nextToken();
@@ -1052,6 +1148,7 @@ public class Compiler {
 							error.show("Identifier expected");
 						messageName = lexer.getStringValue();
 						Method message = klass.searchMethodOnlyNonStatic(messageName);
+						//e por ultimo, procura o metodo estatico, se não achar indica erro tb
 						if(message == null)
 							error.show("Couldn't find static method for static instance.");
 						lexer.nextToken();
@@ -1070,7 +1167,7 @@ public class Compiler {
 						if(v != null || v2 != null){
 							if(v == null)
 								v = v2;
-							
+							//se o tipo do objeto não é uma classe, ele não pode chamar métodos.
 							if(!isType(v.getType().getCname()))
 								error.show("First identifier must be in class in order to call method."+v.getType().getCname());
 							
@@ -1335,6 +1432,7 @@ public class Compiler {
 		
 	}
 	
+	//Método que procura método em super classe, verificando se acha um método até que a superclasse retorn null.
 	private Method findMethodInSuperClass(){
 		Method m = null;
 		KraClass klass;
@@ -1349,7 +1447,7 @@ public class Compiler {
 		return null;
 	}
 	
-	
+	//compara lista de parametros para a chamada de métodos
 	private boolean compareParamLists(ParamList p1, ParamList p2){
 		Iterator<Variable> it1, it2;
 		Variable v1, v2;

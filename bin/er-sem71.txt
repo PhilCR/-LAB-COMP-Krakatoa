@@ -1,0 +1,2 @@
+14 : Can't call instance inside static method.
+        this.x = 0;           //#

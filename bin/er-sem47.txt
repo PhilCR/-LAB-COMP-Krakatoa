@@ -1,0 +1,2 @@
+26 : Couldn't find method m in any of the superclasses of B
+      super.m();       //#

@@ -1,0 +1,2 @@
+21 : Method set not found in member of class
+       a.set(0);       //#

@@ -1,0 +1,2 @@
+11 : Cannot use expression as instruction.
+       k i;    //#

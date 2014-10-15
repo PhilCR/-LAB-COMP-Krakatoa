@@ -1,0 +1,2 @@
+13 : Expression expected
+       write( 1, 2, 3, );  //#

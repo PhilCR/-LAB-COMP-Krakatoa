@@ -1,0 +1,2 @@
+10 : Return statement different from type of method.
+      return 0;         //#

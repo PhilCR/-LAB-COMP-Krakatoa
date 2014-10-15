@@ -1,0 +1,2 @@
+10 : m is not a class
+    public m( int x, int y ) {  //#

@@ -1,0 +1,2 @@
+11 : m is not a class
+    static public m() {  //#

@@ -1,0 +1,2 @@
+18 : End of file expected
+Isto deveria ser um comentario, mas  ...  //#

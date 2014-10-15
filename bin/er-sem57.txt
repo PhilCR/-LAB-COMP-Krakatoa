@@ -1,0 +1,2 @@
+23 : Trying to compare different types
+      if ( a == b )  //#

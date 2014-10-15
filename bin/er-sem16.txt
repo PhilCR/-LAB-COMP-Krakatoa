@@ -1,0 +1,2 @@
+10 : Unary operation not valid for boolean.
+      write( -true );  //#

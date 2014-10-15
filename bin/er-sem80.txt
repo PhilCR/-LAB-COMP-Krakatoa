@@ -1,0 +1,2 @@
+10 : Method run in class Program can't return void.
+    public int run() {  //#

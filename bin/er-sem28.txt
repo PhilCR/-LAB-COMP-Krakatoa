@@ -1,0 +1,2 @@
+11 : Duplicate declaration for instance i
+   private int i;   //#

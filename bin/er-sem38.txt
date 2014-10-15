@@ -1,0 +1,2 @@
+22 : Type error: second type is not convertible to the type of first expression.
+      b = a;         //#

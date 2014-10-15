@@ -1,0 +1,2 @@
+13 : Expression expected
+       i = { 0 };          //#

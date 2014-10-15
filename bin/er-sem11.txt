@@ -1,0 +1,2 @@
+11 : Expression inside while statement needs to of boolean type.
+      while ( 0 )      //#

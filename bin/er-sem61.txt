@@ -1,0 +1,2 @@
+34 : Method s not found in member of class
+       c.s();        //#

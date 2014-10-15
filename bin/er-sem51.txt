@@ -1,0 +1,2 @@
+19 : Different declaration of parameters of method put compared to its definition in the superclass of B
+   public void put(int x, int y, int ok) {  //#

@@ -1,0 +1,2 @@
+26 : Can't call private method from class A
+       a.p();  //#

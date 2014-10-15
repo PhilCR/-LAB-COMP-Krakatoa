@@ -1,0 +1,2 @@
+14 : Redeclaration of public static method m
+    static public void m() {   //#

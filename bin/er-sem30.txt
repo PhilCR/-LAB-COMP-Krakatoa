@@ -1,0 +1,2 @@
+18 : Redefinition of method from superclass has a different return type.
+   public int put() {   //#

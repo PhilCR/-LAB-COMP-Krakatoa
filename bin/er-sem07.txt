@@ -1,0 +1,2 @@
+14 : First identifier must be in class in order to call method.int
+       i.run();   //#

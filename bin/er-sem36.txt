@@ -1,0 +1,2 @@
+22 : Type error: types do not match between expressions.
+      i = a.m();          //#

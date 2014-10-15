@@ -1,0 +1,2 @@
+12 : Redeclaration of public method m
+    public void m() {  //#

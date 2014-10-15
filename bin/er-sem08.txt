@@ -1,0 +1,2 @@
+10 : Boolean type not compatible with arithmetic operations.
+      write( true + false );   //#

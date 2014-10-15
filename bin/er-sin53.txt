@@ -1,0 +1,2 @@
+11 : private, or public expected
+    static int x; //#

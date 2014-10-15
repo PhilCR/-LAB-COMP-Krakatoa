@@ -1,0 +1,2 @@
+13 : Can't write to boolean.
+      write( b );   //#

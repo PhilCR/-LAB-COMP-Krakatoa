@@ -1,3 +1,9 @@
+/*
+ * @author Rodrigo Nascimento de Carvalho 380067
+ * @author Philippe César Ramos 380415
+ * */
+
+
 package comp;
 
 public class CompilerOptions {

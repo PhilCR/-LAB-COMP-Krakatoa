@@ -1,0 +1,2 @@
+10 : Class Program cannot have method run with parameters.
+    public void run(int n) {  //#

@@ -1,0 +1,2 @@
+11 : Variable already declared inside this scope.
+       int i;   //#

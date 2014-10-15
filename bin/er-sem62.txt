@@ -1,0 +1,2 @@
+17 : Using instance variable without 'this'.
+      a = b;    //#
