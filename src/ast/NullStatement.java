@@ -6,7 +6,7 @@
 package ast;
 
 public class NullStatement extends Statement{
-	public void genK(PW pw){
+	public void genC(PW pw){
 		pw.printIdent(";");
 		pw.println("");
 	}

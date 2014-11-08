@@ -18,10 +18,10 @@ public class StatementList {
 	}
 	
 	
-	public void genK(PW pw){
+	public void genC(PW pw){
 		Iterator<Statement> statIt = sList.iterator();
 		while(statIt.hasNext()){
-			statIt.next().genK(pw);
+			statIt.next().genC(pw);
 			pw.println("");
 			//pw.printIdent("");
 		}

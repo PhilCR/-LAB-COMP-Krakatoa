@@ -13,7 +13,7 @@ public class LiteralBoolean extends Expr {
     }
 
     @Override
-	public void genK( PW pw, boolean putParenthesis ) {
+	public void genC( PW pw, boolean putParenthesis ) {
        pw.print( value ? "true" : "false" );
     	
     }

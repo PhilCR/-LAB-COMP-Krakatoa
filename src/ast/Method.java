@@ -8,13 +8,14 @@ package ast;
 import java.util.Iterator;
 
 public class Method {
-	public Method(Type t, String name, boolean privateFlag, boolean staticFlag, boolean finalFlag){
+	public Method(Type t, String name, boolean privateFlag, boolean staticFlag, boolean finalFlag, KraClass thisClass){
 		this.t = t;
 		this.name = name;
 		formalParamList = null;
 		this.privateFlag = privateFlag;
 		this.staticFlag = staticFlag;
 		this.finalFlag = finalFlag;
+		this.thisClass = thisClass;
 	}
 	
 	
@@ -62,25 +63,64 @@ public class Method {
 		return this.finalFlag;
 	}
 	
-	public void genK(PW pw){
-		pw.print(t.getName()+" "+name+"(");
-		if(formalParamList != null){
-			Iterator<Variable> paramIt = formalParamList.elements();
-			while(paramIt.hasNext()){
-				paramIt.next().genK(pw);
-				if(paramIt.hasNext())
-					pw.print(", ");
+	public String getCname(){
+		if(staticFlag)
+			return "_static_"+thisClass.getName()+"_"+name;
+		else
+			return "_"+thisClass.getName()+"_"+name;
+	}
+	
+	public KraClass getThisClass(){
+		return this.thisClass;
+	}
+	
+	public void genC(PW pw){
+		if(staticFlag){
+			if(t.getCname().compareTo("int") == 0 || t.getCname().compareTo("char *") == 0 || t.getCname().compareTo("void") == 0)
+				pw.print(t.getCname()+" _static_"+thisClass.getName()+"_"+name+"(");
+			else
+				pw.print(t.getCname()+"* _static_"+thisClass.getName()+"_"+name+"(");
+			if(formalParamList != null){
+				Iterator<Variable> paramIt = formalParamList.elements();
+				while(paramIt.hasNext()){
+					paramIt.next().genC(pw);
+					if(paramIt.hasNext())
+						pw.print(", ");
+				}
 			}
+			pw.print("){");
+			pw.println("");
+			pw.add();
+			//pw.printIdent("");
+			sList.genC(pw);
+			
+			pw.sub();
+			pw.println("");
+			pw.printlnIdent("}");
+		}else{
+			if(t.getCname().compareTo("int") == 0 || t.getCname().compareTo("char *") == 0 || t.getCname().compareTo("void") == 0)
+				pw.print(t.getCname()+" _"+thisClass.getName()+"_"+name+"( "+thisClass.getCname()+" *this");
+			else
+				pw.print(t.getCname()+"* _"+thisClass.getName()+"_"+name+"( "+thisClass.getCname()+" *this");
+			if(formalParamList != null){
+				pw.print(", ");
+				Iterator<Variable> paramIt = formalParamList.elements();
+				while(paramIt.hasNext()){
+					paramIt.next().genC(pw);
+					if(paramIt.hasNext())
+						pw.print(", ");
+				}
+			}
+			pw.print("){");
+			pw.println("");
+			pw.add();
+			//pw.printIdent("");
+			sList.genC(pw);
+			
+			pw.sub();
+			pw.println("");
+			pw.printlnIdent("}");
 		}
-		pw.print("){");
-		pw.println("");
-		pw.add();
-		//pw.printIdent("");
-		sList.genK(pw);
-		
-		pw.sub();
-		pw.println("");
-		pw.printlnIdent("}");
 	}
 	
 	private Type t;
@@ -90,4 +130,5 @@ public class Method {
 	private boolean privateFlag;
 	private boolean staticFlag;
 	private boolean finalFlag;
+	private KraClass thisClass;
 }

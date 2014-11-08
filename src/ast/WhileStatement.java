@@ -6,13 +6,13 @@
 package ast;
 
 public class WhileStatement extends Statement{
-	public void genK(PW pw){
+	public void genC(PW pw){
 		pw.printIdent("while(");
-		expr.genK(pw, true);
+		expr.genC(pw, true);
 		pw.print("){");
 		pw.add();
 		pw.println("");
-		statement.genK(pw);
+		statement.genC(pw);
 		pw.sub();
 		pw.printlnIdent("}");
 	}

@@ -16,7 +16,8 @@ public class UnaryExpr extends Expr {
 	}
 
 	@Override
-	public void genK(PW pw, boolean putParenthesis) {
+	public void genC(PW pw, boolean putParenthesis) {
+		boolean negFlag = false;
 		switch (op) {
 		case PLUS:
 			pw.print("+");
@@ -26,12 +27,22 @@ public class UnaryExpr extends Expr {
 			break;
 		case NOT:
 			pw.print("!");
+			negFlag = true;
 			break;
 		default:
 			pw.print(" internal error at UnaryExpr::genK");
 
 		}
-		expr.genK(pw, false);
+		if(expr.getType().getName().compareTo(Type.booleanType.getName()) == 0){
+			expr.genC(pw, true);
+			if(negFlag)
+				pw.print(" != false");
+			else
+				pw.print(" == false");
+		}else{
+			expr.genC(pw, false);
+		}
+		
 	}
 
 	@Override

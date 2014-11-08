@@ -36,7 +36,7 @@ public class Comp {
            if ( args.length == 2 )
               outputFileName = args[1];
            else
-              outputFileName = inputFileName + ".kra2";
+              outputFileName = inputFileName + ".c";
            resultFileName = inputFileName + ".txt";
 
 
@@ -122,7 +122,7 @@ public class Comp {
             if ( program != null ) {
                PW pw = new PW();
                pw.set(printWriter);
-               program.genK( pw );
+               program.genC( pw );
                if ( printWriter.checkError() ) {
                   System.out.println("There was an error in the output");
                }

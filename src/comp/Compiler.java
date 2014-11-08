@@ -66,7 +66,7 @@ public class Compiler {
 		//Verificação se existe uma classe Program (equivalente a um Main) dentro do programa definido.
 		boolean foundProgram = false;
 		for(KraClass k : kList){
-			if(k.getCname().compareTo("Program") == 0){
+			if(k.getName().compareTo("Program") == 0){
 				foundProgram = true;
 			}
 		}
@@ -219,11 +219,11 @@ public class Compiler {
 					if(finalMethodFlag == true)
 						error.show("It is not possible to declare a final private method inside a class.");
 					//cria novo metodo e seta currentMethod
-					m = new Method(t, name, true, staticFlag, finalMethodFlag);
+					m = new Method(t, name, true, staticFlag, finalMethodFlag, currentClass);
 					currentMethod = ref.addMethod(m, staticFlag, true);
 				}else{
 					//diferença é que este método naõ é privado, por isso um dos valores passados é false.
-					m = new Method(t, name, false, staticFlag, finalMethodFlag);
+					m = new Method(t, name, false, staticFlag, finalMethodFlag, currentClass);
 					currentMethod = ref.addMethod(m, staticFlag, false);
 				}
 				//hasReturn é setado como false, para podermos verificar se um método com retorno tem realmente pelo menos um retorno
@@ -249,6 +249,8 @@ public class Compiler {
 			}
 		}
 		lexer.nextToken();
+		//constroi tabela virtual para que seja possivel compilar C
+		ref.buildVirtualTable();
 		//retorna classe
 		return ref;
 	}
@@ -261,7 +263,7 @@ public class Compiler {
 		//Procura instancia sendo ela static ou nao dentro da lista de instancias da classe, se nao achar entao adicione
 		// a instancia a lista
 		if((currentClass.searchInstance(name, staticFlag)) == null)
-			varList.addElement(new InstanceVariable(name, type));
+			varList.addElement(new InstanceVariable(name, type, currentClass));
 		else{
 			//senao mostre erro apropriado se ja existe
 			if(staticFlag)
@@ -277,7 +279,7 @@ public class Compiler {
 			String variableName = lexer.getStringValue();
 			//Procura as seguintes declaracoes nas listas correspondentes novamente e adiciona, assim como antes
 			if((currentClass.searchInstance(variableName, staticFlag)) == null)
-				varList.addElement(new InstanceVariable(variableName, type));
+				varList.addElement(new InstanceVariable(variableName, type, currentClass));
 			else{
 				//sinalização de erros especifica para instancias estaticas ou não
 				if(staticFlag)
@@ -669,7 +671,7 @@ public class Compiler {
 		lexer.nextToken();
 		Expr e = expr();
 		//se o tipo de retorno é classe, há a necessidade de fazer a verificação de conversibilidade
-		if(isType(e.getType().getCname())){
+		if(isType(e.getType().getName())){
 			//se a classe tem tipo diferente do de retorno do método, sinaliza erro que o método de retorno está diferente do definido no método
 			if(!checkClassType(currentMethod.getType(), e.getType())){
 				error.show("Type error, return statement is of class type from method");
@@ -1061,7 +1063,7 @@ public class Compiler {
 			exprList = realParameters();
 			//se o método é null, então esse método não foi achado nas superclasses, sinaliza erro
 			if(m == null)
-				error.show("Couldn't find method "+messageName+" in any of the superclasses of "+currentClass.getCname());
+				error.show("Couldn't find method "+messageName+" in any of the superclasses of "+currentClass.getName());
 			else{
 				if(exprList != null){
 					//se o tamanho da lista de parametros do metodo e os valores passados ao mesmo são de tamanhos diferentes, já sinaliza erro.
@@ -1168,10 +1170,10 @@ public class Compiler {
 							if(v == null)
 								v = v2;
 							//se o tipo do objeto não é uma classe, ele não pode chamar métodos.
-							if(!isType(v.getType().getCname()))
-								error.show("First identifier must be in class in order to call method."+v.getType().getCname());
+							if(!isType(v.getType().getName()))
+								error.show("First identifier must be in class in order to call method."+v.getType().getName());
 							
-							KraClass k = symbolTable.getInGlobal(v.getType().getCname());
+							KraClass k = symbolTable.getInGlobal(v.getType().getName());
 							m1 = k.searchMethodOnlyNonStatic(ident);
 							if(m1 == null){
 								k = k.getSuperClass();
@@ -1224,7 +1226,7 @@ public class Compiler {
 							error.show("Identifier does not belong to a class.");
 						Variable v = k.searchInstance(ident, true);
 						if(v == null)
-							error.show("Static instance"+ ident +"does not belong to class "+k.getCname());
+							error.show("Static instance"+ ident +"does not belong to class "+k.getName());
 						return new MessageSendToVariable(k, v);
 					}
 				}
@@ -1382,7 +1384,7 @@ public class Compiler {
 					 */
 					Variable v = currentClass.searchInstance(ident, false);
 					if(v == null)
-						error.show("There is no instance "+ident+" in class "+currentClass.getCname());
+						error.show("There is no instance "+ident+" in class "+currentClass.getName());
 					if(currentMethod.isStatic())
 						error.show("Can't call instance inside static method.");
 					return new MessageSendToSelf(currentClass, v);
@@ -1414,15 +1416,15 @@ public class Compiler {
 	}
 	
 	private boolean checkClassType(Type t, Type t2){
-		if(t.getCname().compareTo(t2.getCname()) == 0)
+		if(t.getName().compareTo(t2.getName()) == 0)
 			return true;
 		else{
 			
-			KraClass klass = symbolTable.getInGlobal(t2.getCname());
+			KraClass klass = symbolTable.getInGlobal(t2.getName());
 			if(klass != null){
 				klass = klass.getSuperClass();
 				while(klass != null){
-					if(klass.getCname().compareTo(t.getCname()) == 0)
+					if(klass.getName().compareTo(t.getName()) == 0)
 						return true;
 					klass = klass.getSuperClass();
 				}

@@ -25,6 +25,10 @@ public class MethodList {
 		return methodList.size();
 	}
 	
+	public Method getElement(int i){
+		return methodList.get(i);
+	}
+	
 	public Method returnLast(){
 		return methodList.get(methodList.size()-1);
 	}

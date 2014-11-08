@@ -7,20 +7,20 @@
 package ast;
 
 public class IfStatement extends Statement{
-	public void genK(PW pw){
+	public void genC(PW pw){
 		pw.printIdent("if(");
-		conditionExpr.genK(pw, true);
+		conditionExpr.genC(pw, true);
 		pw.print("){");
 		pw.add();
 		pw.println("");
-		statement.genK(pw);
+		statement.genC(pw);
 		pw.sub();
 		pw.printlnIdent("}");
 		if(elseStatement != null){
 			pw.printIdent("else{");
 			pw.add();
 			pw.println("");
-			elseStatement.genK(pw);
+			elseStatement.genC(pw);
 			pw.sub();
 			pw.println("");
 			pw.println("");

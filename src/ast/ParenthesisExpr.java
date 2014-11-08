@@ -11,9 +11,9 @@ public class ParenthesisExpr extends Expr {
         this.expr = expr;
     }
     
-    public void genK( PW pw, boolean putParenthesis ) {
+    public void genC( PW pw, boolean putParenthesis ) {
         pw.print("(");
-        expr.genK(pw, false);
+        expr.genC(pw, false);
         pw.print(")");
     }
     

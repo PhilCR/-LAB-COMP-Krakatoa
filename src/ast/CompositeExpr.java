@@ -20,17 +20,18 @@ public class CompositeExpr extends Expr {
     }
     
     @Override
-	public void genK( PW pw, boolean putParenthesis ) {
+	public void genC( PW pw, boolean putParenthesis ) {
         if ( putParenthesis )
           pw.print("(");
-        left.genK(pw, true);
+        left.genC(pw, true);
         String strSymbol = arrayOper.get(oper);
         if ( strSymbol == null ) {
         	pw.println("internal error in CompositeExpr::genK");
         }
-        else
-            pw.print(" " + strSymbol + " ");
-        right.genK(pw, true);
+        else{
+        	pw.print(" " + strSymbol + " ");  
+        }
+        right.genC(pw, true);
         if ( putParenthesis )
           pw.print(")");
     }

@@ -25,10 +25,11 @@ public class KraClass extends Type {
       privateMethodList = new MethodList();
       publicStaticMethodList = new MethodList(); 
       privateStaticMethodList = new MethodList();
+      virtualTable = new MethodList();
    }
    
    public String getCname() {
-      return getName();
+	  return "_class_"+getName();
    }
    
    public String getName(){
@@ -38,26 +39,13 @@ public class KraClass extends Type {
    //Procura instancias dentro da classe, como instancia static podem ter o mesmo nome de uma instancia nao static,
    // entao procura-se nas suas devidas listas
    public InstanceVariable searchInstance(String name, boolean staticFlag){
-	   //Cria o iterator pra percorrer a lista de instancias corretas
-	   Iterator<InstanceVariable> varIterator;
 	   //se a instancia eh static, entao procure na static instance list
 	   if(staticFlag){
-		   varIterator = staticInstanceList.elements();
+		   return staticInstanceList.findElement(name);
 	   // senao procure na instance variable list normal
 	   }else{
-		   varIterator = instanceVariableList.elements();
+		   return instanceVariableList.findElement(name);
 	   }
-	   //loop pra procurar isso 
-	   while(varIterator.hasNext()){
-		   
-		   InstanceVariable var = varIterator.next();
-		   //Se achar uma instancia com o nome que procuro, retorne-a
-		   if(var.getName().compareTo(name) == 0){
-			   return var;
-		   }
-	   }
-	   //se nao achar nenhuma, entao retorna null
-	   return null;
    }
    
    public Method searchMethod(String name){
@@ -200,73 +188,189 @@ public class KraClass extends Type {
 	   return finalFlag;
    }
    
-   public void genK(PW pw){
-	   String initialPrint = "";
-	   if(finalFlag){
-		   initialPrint += "final ";
+   public void buildVirtualTable(){
+	   KraClass superC = superclass;
+	   while(superC != null){
+		   Iterator<Method> sMethodIt = superC.getPublicMethodElements();
+		   
+		   while(sMethodIt.hasNext()){
+			   Method aux = sMethodIt.next();
+			   if(this.searchMethodOnlyNonStaticAndPublic(aux.getName()) == null){
+				   if(this.findMethodInVirtualTable(aux.getName()) == null)
+					   virtualTable.addElement(aux);
+			   }
+		   }
+		   
+		   superC = superC.getSuperClass();
 	   }
-	   initialPrint += "class "+name+" ";
-	   if(superclass != null){
-		   initialPrint += "extends "+superclass.getName();
+	   
+	   Iterator<Method> currentClassMethodIt = this.publicMethodList.elements();
+	   while(currentClassMethodIt.hasNext()){
+		   Method aux = currentClassMethodIt.next();
+		   virtualTable.addElement(aux);
 	   }
-	   initialPrint += " {";
-	   pw.printlnIdent(initialPrint);
+	   
+   }
+   
+   public Method findMethodInVirtualTable(String name){
+	   Iterator<Method> iterator = virtualTable.elements();
+	   Method m = null;
+	   while(iterator.hasNext()){
+		   m = iterator.next();
+		   if(m.getName().compareTo(name) == 0)
+			   return m;
+	   }
+	   return null;
+   }
+   
+   public Iterator<InstanceVariable> getInstancesFromSuperclass(){
+	   InstanceVariableList superInstances = new InstanceVariableList();
+	   
+	   KraClass superC = superclass;
+	   while(superC != null){
+		   Iterator<InstanceVariable> superI = superC.getElementsFromInstList();
+		   
+		   while(superI.hasNext()){
+			   InstanceVariable superInstance = superI.next();
+			   
+			   
+			   if(this.searchInstance(superInstance.getName(), false) == null){
+				   if(superInstances.findElement(superInstance.getName()) == null){
+					   superInstances.addElement(superInstance); 
+				   }
+			   }
+			   
+			   
+		   }
+		   
+		   superC = superC.getSuperClass();
+	   }
+	   
+	   return superInstances.elements();
+   }
+   
+   
+   
+   public Iterator<InstanceVariable> getElementsFromInstList(){
+	   return this.instanceVariableList.elements();
+   }
+   
+   public Iterator<Method> getPublicMethodElements(){
+	   return this.publicMethodList.elements();
+   }
+   
+   public int findAndGetIndexFromVT(String name){
+	   for (int i = 0; i < virtualTable.getSize(); i++){
+	        Method aux = virtualTable.getElement(i);
+	        if (name.equals(aux.getName())){
+	            return i;
+	        }
+	    } 
+
+	    return -1;
+   }
+   
+   public void genC(PW pw){
+	   
+	   
+	   pw.println("typedef");
 	   pw.add();
+	   pw.printlnIdent("struct _St_"+name+"{");
+	   pw.add();
+	   pw.printlnIdent("Func *vt;");
 	   
-	   Iterator<InstanceVariable> instIt = instanceVariableList.elements();
-	   
+	   Iterator<InstanceVariable> instIt = getInstancesFromSuperclass();
 	   while(instIt.hasNext()){
-		   pw.printIdent("private ");
-		   instIt.next().genK(pw);
+		   pw.printIdent("");
+		   instIt.next().genC(pw, false);
+		   pw.print(";");
+		   pw.println(""); 
+	   }
+	   
+	   instIt = instanceVariableList.elements();
+	   while(instIt.hasNext()){
+		   pw.printIdent("");
+		   instIt.next().genC(pw, false);
 		   pw.print(";");
 		   pw.println("");
 	   }
+	   
+	   pw.sub();
+	   pw.printlnIdent("} "+getCname()+";");
+	   pw.sub();
+	   
 	   pw.println("");
+	   pw.println(getCname()+" *new_"+getName()+"(void);");
+	   pw.println("");
+	   
 	   instIt = staticInstanceList.elements();
-	   
 	   while(instIt.hasNext()){
-		   pw.printIdent("private static ");
-		   instIt.next().genK(pw);
+		   pw.printIdent("");
+		   instIt.next().genC(pw, true);
 		   pw.print(";");
 		   pw.println("");
 	   }
 	   pw.println("");
+	   
+	   
 	   Method aux = null;
 	   Iterator<Method> methodIt = publicMethodList.elements();
 	   while(methodIt.hasNext()){
 		   aux = methodIt.next();
-		   if(aux.isFinal()){
-			   pw.printIdent("final public ");
-		   }else{
-			   pw.printIdent("public ");
-		   }
-		   
-		   aux.genK(pw);
+		   pw.println("");
+		   aux.genC(pw);
 	   }
 	   
 	   methodIt = privateMethodList.elements();
 	   while(methodIt.hasNext()){
 		   aux = methodIt.next();
-		   pw.printIdent("private ");
-		   aux.genK(pw);
+		   pw.println("");
+		   aux.genC(pw);
 	   }
 	   
 	   methodIt = publicStaticMethodList.elements();
 	   while(methodIt.hasNext()){
 		   aux = methodIt.next();
-		   pw.printIdent("static public ");
-		   aux.genK(pw);
+		   pw.println("");
+		   aux.genC(pw);
 	   }
 	   
 	   methodIt = privateStaticMethodList.elements();	
 	   while(methodIt.hasNext()){
 		   aux = methodIt.next();
-		   pw.printIdent("static private ");
-		   aux.genK(pw);
+		   pw.println("");
+		   aux.genC(pw);
 	   }
 	   
+	   pw.println("");
+	   pw.println("Func VTclass_"+getName()+"[] = {");
+	   pw.add();
+	   
+	   aux = null;
+	   methodIt = virtualTable.elements();
+	   while(methodIt.hasNext()){
+		   aux = methodIt.next();
+		   pw.printIdent("( void (*)() ) "+aux.getCname());
+		   if(methodIt.hasNext())
+			   pw.print(",");
+		   pw.println("");
+	   }
 	   pw.sub();
-	   pw.printlnIdent("}");
+	   pw.println("};");
+	   
+	   pw.println("");
+	   pw.println(getCname()+" *new_"+getName()+"(){");
+	   pw.add();
+	   pw.printlnIdent(getCname()+" *t;");
+	   pw.println("");
+	   pw.printlnIdent("if( (t = malloc(sizeof("+getCname()+"))) != NULL )");
+	   pw.add();
+	   pw.printlnIdent("t->vt = VTclass_"+getName()+";");
+	   pw.sub();
+	   pw.printlnIdent("return t;");
+	   pw.sub();
+	   pw.println("}");
+	   
    }
    
    private String name;
@@ -275,6 +379,8 @@ public class KraClass extends Type {
    private InstanceVariableList instanceVariableList;
    private InstanceVariableList staticInstanceList;
    private MethodList publicMethodList, privateMethodList, publicStaticMethodList, privateStaticMethodList;
+   
+   private MethodList virtualTable;
    
    // métodos públicos get e set para obter e iniciar as variáveis acima,
    // entre outros métodos

@@ -126,12 +126,12 @@ er-sem22   (10/10) [ : Identifier expected ] (Palavra reservada utilizada como v
 er-sem23   (10/10) [ : Identifier expected ] (Palavra reservada utilizada como variavel)
 er-sem24   (10/10) [ : Identifier expected ] (Palavra reservada utilizada como variavel)
 er-sem25   (10/10) [ : Identifier expected ] (Palavra reservada utilizada como variavel)
-er-sem26   (10/11) [ : Break outside while. ] (O compilador devera sinalizar erro 'break fora de while')
+er-sem26   (10/10) [ : Break outside while. ] (O compilador devera sinalizar erro 'break fora de while')
 er-sem27   (7/7) [ : Trying to extend class from itself. ] (classe A herda de si mesma)
 er-sem28   (11/11) [ : Duplicate declaration for instance i ] (Variavel i declarada duas vezes, mas nao em sequencia)
 er-sem29   (18/18) [ : Different declaration of parameters of method put compared to its definition in the superclass of B ] (put redefinida em B com parametros diferentes daqueles da superclasse)
 er-sem30   (18/18) [ : Redefinition of method from superclass has a different return type. ] (Metodo put em B possui valor de retorno. Na superclasse A, nao.)
-er-sem31   (11/11) [ : Method i has the same name as instance. ] (Metodo com nome igual a de variavel de instancia)
+er-sem31 **(11/0)    (Metodo com nome igual a de variavel de instancia)
 er-sem32   (12/12) [ : Redeclaration of public method m ] (Metodo publico e privado com mesmo nome)
 er-sem33   (12/12) [ : Redeclaration of public method m ] (Dois metodos publicos com mesmo nome)
 er-sem34   (21/21) [ : Cannot use expression as instruction. ] (Chamada  'a.m()' eh uma expressao e esta sendo utilizada como uma instrucao)
@@ -150,7 +150,7 @@ er-sem46   (10/10) [ : Couldn't find method run in any of the superclasses of Pr
 er-sem47   (26/26) [ : Couldn't find method m in any of the superclasses of B ] (Chamada a metodo inexistente utilizando 'super')
 er-sem48   (7/7) [ : Identifier expected ] (Os nomes dos tipos basicos sao reservados e nao podem ser nomes de classes)
 er-sem49   (11/11) [ : Identifier expected ] (Tipos basicos nao podem ser herdados, pois nao sao classes)
-er-sem50   (21/22) [ : Break outside while. ] (O compilador devera sinalizar erro 'break fora de loop-end')
+er-sem50   (21/21) [ : Break outside while. ] (O compilador devera sinalizar erro 'break fora de loop-end')
 er-sem51   (19/19) [ : Different declaration of parameters of method put compared to its definition in the superclass of B ] (put redefinida em B com parametros diferentes daqueles da superclasse A)
 er-sem57   (23/23) [ : Trying to compare different types ] (Testa se o compilador sinalize erro nas comparacoes com == )
 er-sem58   (23/23) [ : Trying to compare different types ] (Testa se o compilador sinalize erro nas comparacoes com != )
@@ -233,9 +233,9 @@ er-sin56   (11/11) [ : m is not a class ] (erro sintaxe na declaracao de metodo 
 
 
 0/67 erros nos arquivos ok-*.s
-0/137 erros nos arquivos er-*.s
+1/137 erros nos arquivos er-*.s
 0/12 erros criticos
 
 
 Para uso do professor:
-0    0    0    411    945    127    
+0    1    0    412    1458    128    

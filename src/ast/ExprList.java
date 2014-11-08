@@ -18,11 +18,11 @@ public class ExprList {
         exprList.add(expr);
     }
 
-    public void genK( PW pw ) {
+    public void genC( PW pw ) {
 
         int size = exprList.size();
         for ( Expr e : exprList ) {
-            e.genK(pw, false);
+            e.genC(pw, false);
             if ( --size > 0 )
                pw.print(", ");
             }

@@ -1,2 +1,1 @@
-11 : Method i has the same name as instance.
-   public void i() {   //#
+0

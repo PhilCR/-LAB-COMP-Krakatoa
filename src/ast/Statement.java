@@ -7,6 +7,6 @@ package ast;
 
 abstract public class Statement {
 
-	abstract public void genK(PW pw);
+	abstract public void genC(PW pw);
 
 }

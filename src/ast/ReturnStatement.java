@@ -6,10 +6,10 @@
 package ast;
 
 public class ReturnStatement extends Statement{
-	public void genK(PW pw){
+	public void genC(PW pw){
 		pw.println("");
 		pw.printIdent("return ");
-		returnExpr.genK(pw, false);
+		returnExpr.genC(pw, false);
 		pw.print(";");
 	}
 	

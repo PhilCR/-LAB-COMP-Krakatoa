@@ -15,7 +15,7 @@ public class LiteralInt extends Expr {
     public int getValue() {
         return value;
     }
-    public void genK( PW pw, boolean putParenthesis ) {
+    public void genC( PW pw, boolean putParenthesis ) {
         pw.print(value + "");
     }
     

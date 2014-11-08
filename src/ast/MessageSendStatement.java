@@ -8,9 +8,9 @@ package ast;
 public class MessageSendStatement extends Statement { 
 
 
-   public void genK( PW pw ) {
+   public void genC( PW pw ) {
       pw.printlnIdent("");
-      messageSend.genK(pw, false);
+      messageSend.genC(pw, false);
       pw.print(";");
    }
 

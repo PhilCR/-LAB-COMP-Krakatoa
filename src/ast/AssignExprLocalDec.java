@@ -10,7 +10,7 @@ import java.util.Iterator;
 
 public class AssignExprLocalDec extends Expr{
 	//AQUI VAI TER QUE TRATAR CASOS LOUCAMENTE 
-	public void genK( PW pw, boolean putParenthesis ) {
+	public void genC( PW pw, boolean putParenthesis ) {
 		
 		if(firstExpr == null){
 			if(localList != null){
@@ -18,14 +18,24 @@ public class AssignExprLocalDec extends Expr{
 				Variable aux;
 				while(varIt.hasNext()){
 					aux = varIt.next();
-					pw.print(aux.getType().getName()+" "+aux.getName());
+					Type t = aux.getType();
+					if(t.getCname().compareTo("int") == 0 || t.getCname().compareTo("char *") == 0 || t.getCname().compareTo("void") == 0)
+						pw.print(aux.getType().getCname()+" _"+aux.getName());
+					else
+						pw.print(aux.getType().getCname()+" *_"+aux.getName());
 				}
 			}
 		}else{
-			firstExpr.genK(pw, putParenthesis);
+			firstExpr.genC(pw, putParenthesis);
 			if(secondExpr != null){
 				pw.print(" = ");
-				secondExpr.genK(pw, putParenthesis);
+				Type t = secondExpr.getType();
+				if(t.getCname().compareTo("int") == 0 || t.getCname().compareTo("char *") == 0 || t.getCname().compareTo("void") == 0)
+					secondExpr.genC(pw, putParenthesis);
+				else{
+					pw.print("( "+ t.getCname() +"* ) ");
+					secondExpr.genC(pw, putParenthesis);
+				}
 			}
 		}
 	}

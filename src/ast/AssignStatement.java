@@ -13,10 +13,10 @@ public class AssignStatement extends Statement{
 	}
 	
 	@Override
-	public void genK(PW pw) {
+	public void genC(PW pw) {
 		// TODO Auto-generated method stub
 		pw.printIdent("");
-		assignExpr.genK(pw, false);
+		assignExpr.genC(pw, false);
 		pw.print(";");
 	}
 
